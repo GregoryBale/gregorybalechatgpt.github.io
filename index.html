@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <!-- Yandex.RTB -->
-<script>window.yaContextCb=window.yaContextCb||[]</script>
-<script src="https://yandex.ru/ads/system/context.js" async></script>
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
 </head>
 <body>
     <div class="chat-app">
@@ -30,6 +30,8 @@
         <main class="chat-main">            
             <div id="chat-messages" class="chat-messages">
                 <!-- Сообщения будут добавляться здесь -->
+                <!-- Yandex.RTB R-A-12365980-1 -->
+                <div id="yandex_rtb_R-A-12365980-1" class="yandex-ad"></div>
             </div>
             <footer class="chat-footer">
                 <div class="chat-input-container">
@@ -39,16 +41,14 @@
             </footer>
         </main>
     </div>
-    <!-- Yandex.RTB R-A-12365980-1 -->
-<div id="yandex_rtb_R-A-12365980-1"></div>
-<script>
-window.yaContextCb.push(() => {
-    Ya.Context.AdvManager.render({
-        "blockId": "R-A-12365980-1",
-        "renderTo": "yandex_rtb_R-A-12365980-1"
+    <script>
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            "blockId": "R-A-12365980-1",
+            "renderTo": "yandex_rtb_R-A-12365980-1"
+        })
     })
-})
-</script>
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
