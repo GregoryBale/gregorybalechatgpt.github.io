@@ -9,6 +9,7 @@ const chatHistory = document.getElementById('chat-history');
 let selectedModel = 'random';
 let currentChatId = null;
 let chats = JSON.parse(localStorage.getItem('chats')) || {};
+let messageCount = 0;
 
 const aiModels = {
     'llama': 'https://paxsenix.serv00.net/v1/llama.php?text=',
@@ -22,11 +23,25 @@ function getRandomModel() {
     return models[Math.floor(Math.random() * models.length)];
 }
 
-function addMessage(content, isUser = false, aiInfo = '') {
+function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', isUser ? 'user-message' : 'ai-message');
+    messageDiv.classList.add('message', isUser ? 'user-message' : isAd ? 'ad-message' : 'ai-message');
     
-    if (content.includes('```')) {
+    if (isAd) {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <p>Рекламное сообщение:</p>
+                <div id="yandex_rtb_R-A-12365980-1"></div>
+            </div>
+        `;
+        // Рендерим рекламу Яндекса
+        window.yaContextCb.push(() => {
+            Ya.Context.AdvManager.render({
+                "blockId": "R-A-12365980-1",
+                "renderTo": "yandex_rtb_R-A-12365980-1"
+            })
+        });
+    } else if (content.includes('```')) {
         const parts = content.split('```');
         parts.forEach((part, index) => {
             if (index % 2 === 0) {
@@ -39,7 +54,7 @@ function addMessage(content, isUser = false, aiInfo = '') {
         messageDiv.textContent = content;
     }
 
-    if (!isUser && aiInfo) {
+    if (!isUser && !isAd && aiInfo) {
         const aiInfoDiv = document.createElement('div');
         aiInfoDiv.classList.add('ai-info');
         aiInfoDiv.textContent = aiInfo;
@@ -49,16 +64,22 @@ function addMessage(content, isUser = false, aiInfo = '') {
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    if (currentChatId) {
+    if (currentChatId && !isAd) {
         if (!chats[currentChatId].messages) {
             chats[currentChatId].messages = [];
         }
         chats[currentChatId].messages.push({
             content,
             isUser,
-            aiInfo
+            aiInfo,
+            isAd: false
         });
         saveChatToLocalStorage();
+    }
+
+    messageCount++;
+    if (messageCount % 5 === 0 && !isAd) {
+        addMessage('', false, '', true); // Добавляем рекламу после каждого 5-го сообщения
     }
 }
 
@@ -142,8 +163,9 @@ function updateChatHistory() {
 function loadChat(chatId) {
     currentChatId = chatId;
     chatMessages.innerHTML = '';
+    messageCount = 0;
     chats[chatId].messages.forEach(msg => {
-        addMessage(msg.content, msg.isUser, msg.aiInfo);
+        addMessage(msg.content, msg.isUser, msg.aiInfo, msg.isAd);
     });
     updateChatHistory();
 }
@@ -166,6 +188,7 @@ clearButton.addEventListener('click', () => {
     if (currentChatId) {
         chatMessages.innerHTML = '';
         chats[currentChatId].messages = [];
+        messageCount = 0;
         saveChatToLocalStorage();
     }
 });
@@ -192,7 +215,7 @@ function highlightCode() {
 }
 
 const originalAddMessage = addMessage;
-addMessage = function(content, isUser = false, aiInfo = '') {
-    originalAddMessage(content, isUser, aiInfo);
+addMessage = function(content, isUser = false, aiInfo = '', isAd = false) {
+    originalAddMessage(content, isUser, aiInfo, isAd);
     highlightCode();
 };
