@@ -105,10 +105,27 @@ body {
 }
 
 .chat-messages {
-    flex-grow: 1;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
-    background-color: var(--tg-theme-bg-color);
+    padding-bottom: 60px; /* Adjust this value to leave space for the ad */
+}
+
+.yandex-ad {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px 0;
+    z-index: 10;
+}
+
+.chat-footer {
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 250px); /* Adjust based on your sidebar width */
+    background-color: white;
+    z-index: 20;
 }
 
 .message {
@@ -128,12 +145,6 @@ body {
 
 .ai-message {
     background-color: var(--tg-theme-secondary-bg-color);
-}
-
-.chat-footer {
-    padding: 15px;
-    background-color: var(--tg-theme-bg-color);
-    border-top: 1px solid #e0e0e0;
 }
 
 .chat-input-container {
