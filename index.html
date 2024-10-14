@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расширенный AI Чат</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">Бесплатный chatgpt (beta)</div>
+            <div class="chat-actions">
+                <button class="chat-action-btn" id="clearChatBtn" title="Очистить чат"><i class="fas fa-trash"></i></button>
+                <button class="chat-action-btn" id="saveChatBtn" title="Сохранить чат"><i class="fas fa-save"></i></button>
+                <button class="chat-action-btn" id="toggleDarkModeBtn" title="Переключить тему"><i class=""></i></button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="Введите ваше сообщение..." />
+            <button id="sendButton">Отправить</button>
+        </div>
+        <center>
+            <p>Могут быть некоторые ошибки, если модели перестают отвечать или выдают ошибку - очищайте чат. v.0.0.11 beta</p><br>
+        </center>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="script.js" defer></script>
+</body>
+</html>
