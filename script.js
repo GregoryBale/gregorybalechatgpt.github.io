@@ -28,18 +28,19 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
     messageDiv.classList.add('message', isUser ? 'user-message' : isAd ? 'ad-message' : 'ai-message');
     
     if (isAd) {
+        const adId = `yandex_rtb_R-A-12365980-1-${Date.now()}`;
         messageDiv.innerHTML = `
             <div class="message-content">
                 <p>Рекламное сообщение:</p>
-                <div id="yandex_rtb_R-A-12365980-1"></div>
+                <div id="${adId}"></div>
             </div>
         `;
         // Рендерим рекламу Яндекса
         window.yaContextCb.push(() => {
             Ya.Context.AdvManager.render({
                 "blockId": "R-A-12365980-1",
-                "renderTo": "yandex_rtb_R-A-12365980-1"
-            })
+                "renderTo": adId
+            });
         });
     } else if (content.includes('```')) {
         const parts = content.split('```');
