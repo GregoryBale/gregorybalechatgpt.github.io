@@ -229,7 +229,23 @@ code {
         flex-grow: 1;
         max-width: 100%;
     }
+.ad-message {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+}
 
+.ad-message .message-content p {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#yandex_rtb_R-A-12365980-1 {
+    max-width: 100%;
+    overflow: hidden;
+}
     .chat-messages {
         flex-grow: 1;
         overflow-y: auto;
