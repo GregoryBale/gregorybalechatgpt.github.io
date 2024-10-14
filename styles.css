@@ -141,6 +141,20 @@ body {
     align-items: center;
 }
 
+.ad-message {
+    background-color: #ffd700;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 100%;
+}
+.ai-info {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
 #user-input {
     flex-grow: 1;
     border: 1px solid #e0e0e0;
