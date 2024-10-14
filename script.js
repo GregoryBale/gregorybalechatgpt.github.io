@@ -1,6 +1,6 @@
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-message');
+const sendButton = document.getElementById('send-button');
 const clearButton = document.getElementById('clear-chat');
 const aiModelSelect = document.getElementById('ai-model-select');
 const currentModelSpan = document.getElementById('current-model');
@@ -8,19 +8,36 @@ const chatHistory = document.getElementById('chat-history');
 
 let selectedModel = 'random';
 let currentChatId = null;
-let chats = JSON.parse(localStorage.getItem('chats')) || {};
+let chats = {};
 let messageCount = 0;
 
 const aiModels = {
-    'llama': 'https://paxsenix.serv00.net/v1/llama.php?text=',
-    'gemini': 'https://paxsenix.serv00.net/v1/gemini.php?text=',
-    'gpt3.5': 'https://paxsenix.serv00.net/v1/gpt3.5.php?text=',
-    'gpt4-32k': 'https://paxsenix.serv00.net/v1/gpt4-32k.php?text=',
+    'llama': 'https://paxsenix.serv00.net/v1/llama.php',
+    'gemini': 'https://paxsenix.serv00.net/v1/gemini.php',
+    'gpt3.5': 'https://paxsenix.serv00.net/v1/gpt3.5.php',
+    'gpt4-32k': 'https://paxsenix.serv00.net/v1/gpt4-32k.php',
 };
 
 function getRandomModel() {
     const models = Object.keys(aiModels);
     return models[Math.floor(Math.random() * models.length)];
+}
+
+function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(JSON.stringify(value)) + ';expires=' + expires.toUTCString() + ';path=/';
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return JSON.parse(decodeURIComponent(c.substring(nameEQ.length, c.length)));
+    }
+    return null;
 }
 
 function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
@@ -35,7 +52,6 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
                 <div id="${adId}"></div>
             </div>
         `;
-        // Рендерим рекламу Яндекса
         window.yaContextCb.push(() => {
             Ya.Context.AdvManager.render({
                 "blockId": "R-A-12365980-1",
@@ -75,12 +91,12 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
             aiInfo,
             isAd: false
         });
-        saveChatToLocalStorage();
+        saveChatToCookie();
     }
 
     messageCount++;
     if (messageCount % 5 === 0 && !isAd) {
-        addMessage('', false, '', true); // Добавляем рекламу после каждого 5-го сообщения
+        addMessage('', false, '', true);
     }
 }
 
@@ -95,7 +111,19 @@ async function sendMessage() {
         const apiUrl = aiModels[model];
 
         try {
-            const response = await fetch(apiUrl + encodeURIComponent(message.replace(/ /g, '+')));
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    messages: chats[currentChatId].messages.map(msg => ({
+                        role: msg.isUser ? 'user' : 'assistant',
+                        content: msg.content
+                    }))
+                })
+            });
+
             if (!response.ok) {
                 throw new Error('API request failed');
             }
@@ -111,7 +139,18 @@ async function sendMessage() {
             const newModel = getRandomModel();
             const newApiUrl = aiModels[newModel];
             try {
-                const newResponse = await fetch(newApiUrl + encodeURIComponent(message.replace(/ /g, '+')));
+                const newResponse = await fetch(newApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: chats[currentChatId].messages.map(msg => ({
+                            role: msg.isUser ? 'user' : 'assistant',
+                            content: msg.content
+                        }))
+                    })
+                });
                 if (!newResponse.ok) {
                     throw new Error('API request failed');
                 }
@@ -138,13 +177,13 @@ function createNewChat() {
         messages: []
     };
     currentChatId = chatId;
-    saveChatToLocalStorage();
+    saveChatToCookie();
     updateChatHistory();
     loadChat(chatId);
 }
 
-function saveChatToLocalStorage() {
-    localStorage.setItem('chats', JSON.stringify(chats));
+function saveChatToCookie() {
+    setCookie('chats', chats, 30); // Сохраняем на 30 дней
 }
 
 function updateChatHistory() {
@@ -190,7 +229,7 @@ clearButton.addEventListener('click', () => {
         chatMessages.innerHTML = '';
         chats[currentChatId].messages = [];
         messageCount = 0;
-        saveChatToLocalStorage();
+        saveChatToCookie();
     }
 });
 
@@ -201,11 +240,17 @@ aiModelSelect.addEventListener('change', (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     currentModelSpan.textContent = aiModelSelect.options[aiModelSelect.selectedIndex].text;
-    updateChatHistory();
-    if (Object.keys(chats).length === 0) {
-        createNewChat();
+    const savedChats = getCookie('chats');
+    if (savedChats) {
+        chats = savedChats;
+        updateChatHistory();
+        if (Object.keys(chats).length > 0) {
+            loadChat(Object.keys(chats)[0]);
+        } else {
+            createNewChat();
+        }
     } else {
-        loadChat(Object.keys(chats)[0]);
+        createNewChat();
     }
 });
 
