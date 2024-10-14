@@ -1,292 +1,198 @@
-const chatMessages = document.getElementById('chatMessages');
-const chatInput = document.getElementById('chatInput');
-const sendButton = document.getElementById('sendButton');
-const clearChatBtn = document.getElementById('clearChatBtn');
-const saveChatBtn = document.getElementById('saveChatBtn');
-const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
-const toast = document.getElementById('toast');
-const md = window.markdownit();
+const chatMessages = document.getElementById('chat-messages');
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-message');
+const clearButton = document.getElementById('clear-chat');
+const aiModelSelect = document.getElementById('ai-model-select');
+const currentModelSpan = document.getElementById('current-model');
+const chatHistory = document.getElementById('chat-history');
 
-let chatHistory = [];
-let darkMode = false;
-let context = '';
-let maxContextLength = 1000;
-let lastApiCallTime = 0;
-const apiCallDelay = 5000; // 5 секунд задержки между вызовами API
+let selectedModel = 'random';
+let currentChatId = null;
+let chats = JSON.parse(localStorage.getItem('chats')) || {};
 
-hljs.configure({
-    languages: ['javascript', 'python', 'java', 'c', 'cpp', 'csharp', 'ruby', 'php', 'go', 'rust']
-});
+const aiModels = {
+    'llama': 'https://paxsenix.serv00.net/v1/llama.php?text=',
+    'gemini': 'https://paxsenix.serv00.net/v1/gemini.php?text=',
+    'gpt3.5': 'https://paxsenix.serv00.net/v1/gpt3.5.php?text=',
+    'gpt4-32k': 'https://paxsenix.serv00.net/v1/gpt4-32k.php?text=',
+};
 
-const APIs = [
-    { url: 'https://paxsenix.serv00.net/v1/gpt4o.php?text=', name: 'GPT-4' },
-    { url: 'https://paxsenix.serv00.net/v1/gpt4-32k.php?text=', name: 'GPT-4 32k' },
-    { url: 'https://paxsenix.serv00.net/v1/gpt3.5.php?text=', name: 'GPT-3.5' }
-];
+function getRandomModel() {
+    const models = Object.keys(aiModels);
+    return models[Math.floor(Math.random() * models.length)];
+}
+
+function addMessage(content, isUser = false, aiInfo = '') {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', isUser ? 'user-message' : 'ai-message');
+    
+    if (content.includes('```')) {
+        const parts = content.split('```');
+        parts.forEach((part, index) => {
+            if (index % 2 === 0) {
+                messageDiv.innerHTML += `<p>${part}</p>`;
+            } else {
+                messageDiv.innerHTML += `<pre><code>${part}</code></pre>`;
+            }
+        });
+    } else {
+        messageDiv.textContent = content;
+    }
+
+    if (!isUser && aiInfo) {
+        const aiInfoDiv = document.createElement('div');
+        aiInfoDiv.classList.add('ai-info');
+        aiInfoDiv.textContent = aiInfo;
+        messageDiv.appendChild(aiInfoDiv);
+    }
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    if (currentChatId) {
+        if (!chats[currentChatId].messages) {
+            chats[currentChatId].messages = [];
+        }
+        chats[currentChatId].messages.push({
+            content,
+            isUser,
+            aiInfo
+        });
+        saveChatToLocalStorage();
+    }
+}
+
+async function sendMessage() {
+    ensureCurrentChat();
+    const message = userInput.value.trim();
+    if (message) {
+        addMessage(message, true);
+        userInput.value = '';
+
+        const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
+        const apiUrl = aiModels[model];
+
+        try {
+            const response = await fetch(apiUrl + encodeURIComponent(message.replace(/ /g, '+')));
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+            const data = await response.json();
+            if (data.ok && data.response) {
+                addMessage(data.response, false, `Ответ получен от: ${model}`);
+            } else {
+                throw new Error('Invalid response format');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addMessage('Произошла ошибка при получении ответа. Попробуем другую модель.', false);
+            const newModel = getRandomModel();
+            const newApiUrl = aiModels[newModel];
+            try {
+                const newResponse = await fetch(newApiUrl + encodeURIComponent(message.replace(/ /g, '+')));
+                if (!newResponse.ok) {
+                    throw new Error('API request failed');
+                }
+                const newData = await newResponse.json();
+                if (newData.ok && newData.response) {
+                    addMessage(newData.response, false, `Ответ получен от: ${newModel} (после ошибки)`);
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (newError) {
+                console.error('Error with new model:', newError);
+                addMessage('К сожалению, не удалось получить ответ. Пожалуйста, попробуйте позже.', false);
+            }
+        }
+        updateChatHistory();
+    }
+}
+
+function createNewChat() {
+    const chatId = Date.now().toString();
+    chats[chatId] = {
+        id: chatId,
+        title: `Чат ${Object.keys(chats).length + 1}`,
+        messages: []
+    };
+    currentChatId = chatId;
+    saveChatToLocalStorage();
+    updateChatHistory();
+    loadChat(chatId);
+}
+
+function saveChatToLocalStorage() {
+    localStorage.setItem('chats', JSON.stringify(chats));
+}
+
+function updateChatHistory() {
+    chatHistory.innerHTML = '';
+    Object.values(chats).forEach(chat => {
+        const chatItem = document.createElement('div');
+        chatItem.classList.add('chat-item');
+        chatItem.textContent = chat.title;
+        chatItem.addEventListener('click', () => loadChat(chat.id));
+        if (chat.id === currentChatId) {
+            chatItem.classList.add('active');
+        }
+        chatHistory.appendChild(chatItem);
+    });
+}
+
+function loadChat(chatId) {
+    currentChatId = chatId;
+    chatMessages.innerHTML = '';
+    chats[chatId].messages.forEach(msg => {
+        addMessage(msg.content, msg.isUser, msg.aiInfo);
+    });
+    updateChatHistory();
+}
+
+function ensureCurrentChat() {
+    if (!currentChatId) {
+        createNewChat();
+    }
+}
 
 sendButton.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', function (e) {
+userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
 });
 
-clearChatBtn.addEventListener('click', clearChat);
-saveChatBtn.addEventListener('click', saveChat);
-toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
-
-async function sendMessage() {
-    const userMessage = chatInput.value.trim();
-    if (!userMessage) return;
-
-    addMessageToChat(userMessage, 'user');
-    chatInput.value = '';
-
-    showTypingIndicator();
-
-    try {
-        const response = await getResponseFromAPI(userMessage);
-        hideTypingIndicator();
-        addMessageToChat(response, 'bot');
-    } catch (error) {
-        hideTypingIndicator();
-        console.error('Error in sendMessage:', error);
-        addMessageToChat(`Произошла ошибка при получении ответа: ${error.message}. Пожалуйста, попробуйте еще раз.`, 'system');
+clearButton.addEventListener('click', () => {
+    if (currentChatId) {
+        chatMessages.innerHTML = '';
+        chats[currentChatId].messages = [];
+        saveChatToLocalStorage();
     }
-}
+});
 
-async function fetchFromAPI(api, message) {
-    const now = Date.now();
-    if (now - lastApiCallTime < apiCallDelay) {
-        await new Promise(resolve => setTimeout(resolve, apiCallDelay - (now - lastApiCallTime)));
-    }
-    lastApiCallTime = Date.now();
+aiModelSelect.addEventListener('change', (e) => {
+    selectedModel = e.target.value;
+    currentModelSpan.textContent = e.target.options[e.target.selectedIndex].text;
+});
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-    try {
-        const response = await fetch(api.url + encodeURIComponent(message), {
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('API response:', data);
-
-        if (data && data.response) {
-            return { success: true, data: data.response };
-        } else {
-            console.error('Invalid API response structure:', data);
-            throw new Error('Invalid response structure');
-        }
-    } catch (error) {
-        console.error(`Error with ${api.name} API:`, error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function getResponseFromAPI(message) {
-    updateContext();
-    const fullMessage = `Контекст предыдущих сообщений:\n${context}\n\nНовое сообщение: ${message}`;
-
-    for (const api of APIs) {
-        addMessageToChat(`Пробуем использовать модель ${api.name}...`, 'system');
-        const result = await fetchFromAPI(api, fullMessage);
-        if (result.success) {
-            addMessageToChat(`Успешно использована модель ${api.name}`, 'system');
-            return result.data;
-        } else {
-            addMessageToChat(`Модель ${api.name} не ответила (${result.error}), пробуем следующую...`, 'system');
-        }
-    }
-
-    throw new Error('Не удалось получить ответ от всех доступных моделей. Попробуйте очистить чат или повторить запрос позже.');
-}
-
-function addMessageToChat(message, sender) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message', sender);
-    
-    if (sender === 'system') {
-        messageElement.classList.add('system-message');
-        messageElement.textContent = message;
+document.addEventListener('DOMContentLoaded', () => {
+    currentModelSpan.textContent = aiModelSelect.options[aiModelSelect.selectedIndex].text;
+    updateChatHistory();
+    if (Object.keys(chats).length === 0) {
+        createNewChat();
     } else {
-        const formattedMessage = md.render(message);
-        messageElement.innerHTML = formattedMessage;
-
-        messageElement.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightElement(block);
-            addCopyCodeButton(block);
-        });
-
-        if (sender === 'bot') {
-            addRegenerateButton(messageElement);
-        }
-    }
-
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    if (sender !== 'system') {
-        chatHistory.push({ sender, message });
-    }
-}
-
-function addCopyCodeButton(block) {
-    const button = document.createElement('button');
-    button.textContent = 'Копировать';
-    button.className = 'copy-code-btn';
-    button.addEventListener('click', () => {
-        navigator.clipboard.writeText(block.textContent).then(() => {
-            showToast('Код скопирован!', 'success');
-        }, () => {
-            showToast('Не удалось скопировать код', 'error');
-        });
-    });
-    block.parentNode.insertBefore(button, block);
-}
-
-function addRegenerateButton(messageElement) {
-    const button = document.createElement('button');
-    button.textContent = 'Регенерировать';
-    button.className = 'regenerate-btn';
-    button.addEventListener('click', async () => {
-        const originalMessage = chatHistory[chatHistory.length - 2].message;
-        showTypingIndicator();
-        try {
-            const response = await getResponseFromAPI(originalMessage);
-            hideTypingIndicator();
-            messageElement.innerHTML = md.render(response);
-            messageElement.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-                addCopyCodeButton(block);
-            });
-            addRegenerateButton(messageElement);
-            chatHistory[chatHistory.length - 1].message = response;
-        } catch (error) {
-            hideTypingIndicator();
-            showToast('Ошибка при регенерации ответа', 'error');
-        }
-    });
-    messageElement.appendChild(button);
-}
-
-function showTypingIndicator() {
-    const typingIndicator = document.createElement('div');
-    typingIndicator.classList.add('typing-indicator');
-    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
-    chatMessages.appendChild(typingIndicator);
-    setTimeout(() => typingIndicator.classList.add('visible'), 100);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function hideTypingIndicator() {
-    const typingIndicator = chatMessages.querySelector('.typing-indicator');
-    if (typingIndicator) {
-        typingIndicator.classList.remove('visible');
-        setTimeout(() => typingIndicator.remove(), 300);
-    }
-}
-
-function updateContext() {
-    const lastMessages = chatHistory.slice(-5);
-    context = lastMessages.map(msg => `${msg.sender}: ${msg.message}`).join('\n');
-    
-    if (context.length > maxContextLength) {
-        context = context.substring(context.length - maxContextLength);
-    }
-}
-
-function clearChat() {
-    chatMessages.innerHTML = '';
-    chatHistory = [];
-    context = '';
-    showToast('Чат очищен', 'success');
-}
-
-function saveChat() {
-    const chatContent = chatHistory.map(msg => `${msg.sender}: ${msg.message}`).join('\n\n');
-    const blob = new Blob([chatContent], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'chat_history.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('Чат сохранен', 'success');
-}
-
-function toggleDarkMode() {
-    darkMode = !darkMode;
-    document.body.classList.toggle('dark-mode', darkMode);
-    toggleDarkModeBtn.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    showToast(darkMode ? 'Темная тема включена' : 'Светлая тема включена', 'success');
-}
-
-function showToast(message, type) {
-    toast.textContent = message;
-    toast.className = `toast ${type} show`;
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-}
-
-chatInput.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    chatInput.classList.add('dragover');
-});
-
-chatInput.addEventListener('dragleave', () => {
-    chatInput.classList.remove('dragover');
-});
-
-chatInput.addEventListener('drop', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    chatInput.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            chatInput.value = event.target.result;
-        };
-        reader.readAsText(file);
+        loadChat(Object.keys(chats)[0]);
     }
 });
 
-if ('webkitSpeechRecognition' in window) {
-    const recognition = new webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = 'ru-RU';
-
-    const voiceInputBtn = document.createElement('button');
-    voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-    voiceInputBtn.className = 'chat-action-btn';
-    voiceInputBtn.title = 'Голосовой ввод';
-    document.querySelector('.chat-actions').appendChild(voiceInputBtn);
-
-    voiceInputBtn.addEventListener('click', () => {
-        recognition.start();
-        showToast('Говорите...', 'success');
-    });
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        chatInput.value = transcript;
-        showToast('Голосовой ввод завершен', 'success');
-    };
-
-    recognition.onerror = (event) => {
-        showToast('Ошибка голосового ввода', 'error');
-    };
+function highlightCode() {
+    if (typeof Prism !== 'undefined') {
+        Prism.highlightAll();
+    }
 }
 
-showToast('Добро пожаловать в Расширенный AI Чат!', 'success');
+const originalAddMessage = addMessage;
+addMessage = function(content, isUser = false, aiInfo = '') {
+    originalAddMessage(content, isUser, aiInfo);
+    highlightCode();
+};

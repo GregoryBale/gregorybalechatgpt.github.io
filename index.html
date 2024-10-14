@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расширенный AI Чат</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+    <title>AI Чат (Telegram Style)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="chat-title">Бесплатный chatgpt (beta)</div>
-            <div class="chat-actions">
-                <button class="chat-action-btn" id="clearChatBtn" title="Очистить чат"><i class="fas fa-trash"></i></button>
-                <button class="chat-action-btn" id="saveChatBtn" title="Сохранить чат"><i class="fas fa-save"></i></button>
-                <button class="chat-action-btn" id="toggleDarkModeBtn" title="Переключить тему"><i class=""></i></button>
+    <div class="chat-app">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>Чат с ИИ (<span id="current-model"></span>)<br><button id="clear-chat" title="Очистить чат">Очистить чат  <i class="fas fa-trash"></i></button></h1>
+            </header>
+            <div class="model-select">
+                <select id="ai-model-select">
+                    <option value="random">Случайный ИИ</option>
+                    <option value="llama">Лама 3-8Б</option>
+                    <option value="gemini">Gemini AI</option>                   
+                    <option value="gpt3.5">GPT-3.5</option>
+                    <option value="gpt4-32k">GPT-4 32k</option>
+                </select>
+            </div>            
+        </aside>
+        <main class="chat-main">            
+            <div id="chat-messages" class="chat-messages">
+                <!-- Сообщения будут добавляться здесь -->
             </div>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input-container">
-            <input type="text" id="chatInput" placeholder="Введите ваше сообщение..." />
-            <button id="sendButton">Отправить</button>
-        </div>
-        <center>
-            <p>Могут быть некоторые ошибки, если модели перестают отвечать или выдают ошибку - очищайте чат. v.0.0.11 beta</p><br>
-        </center>
+            <footer class="chat-footer">
+                <div class="chat-input-container">
+                    <textarea id="user-input" placeholder="Введите ваше сообщение..."></textarea>
+                    <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </footer>
+        </main>
     </div>
-    <div class="toast" id="toast"></div>
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
