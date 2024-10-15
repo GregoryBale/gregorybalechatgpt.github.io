@@ -1,69 +1,140 @@
 <!DOCTYPE html>
+
 <html lang="ru">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>AI Чат by @gregorybale</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link rel="stylesheet" href="styles.css">
+
     <link rel="stylesheet" href="add_custom_model.css">
+
    
+
     <!-- Yandex.RTB -->
+
     <script>window.yaContextCb=window.yaContextCb||[]</script>
+
     <script src="https://yandex.ru/ads/system/context.js" async></script>
+
 </head>
+
 <body>
+
     <div class="chat-app">
+
         <aside class="sidebar">
+
             <header class="sidebar-header">
+
                 <h1>Чат с ИИ (<span id="current-model"></span>)<br><button id="clear-chat" title="Очистить чат">Очистить чат  <i class="fas fa-trash"></i></button></h1>
+
             </header>
+
             <div class="model-select">
+
                 <select id="ai-model-select">
+
                     <option value="random">Случайный ИИ</option>
+
                     <option value="llama">Лама 3-8Б</option>
+
                     <option value="gemini">Gemini AI</option>                   
+
                     <option value="gpt3.5">GPT-3.5</option>
+
                     <option value="gpt4-32k">GPT-4 32k</option>
+
                 </select>
+
             </div>            
+
         </aside>
+
         <main class="chat-main">
+
             <div id="chat-messages" class="chat-messages">
+
                 <!-- Сообщения будут добавляться здесь -->
+
             </div>
+
             <footer class="chat-footer">
+
                 <div class="chat-input-container">
+
                     <button id="add-model-button" aria-label="Add custom model" title="Добавить новую модель">
+
                         <i class="fas fa-plus"></i>
+
                     </button>
+
                     <textarea id="user-input" placeholder="Введите ваше сообщение..."></textarea>
+
                     <button id="send-message" aria-label="Send message" title="Отправить сообщение">
+
                         <i class="fas fa-paper-plane"></i>
+
                     </button>
+
                 </div>
+
             </footer>
+
         </main>
+
         
+
         <!-- Модальное окно для добавления пользовательской модели -->
+
         <div id="add-model-modal" class="modal">
+
             <div class="modal-content">
+
                 <span id="close-modal" class="close">&times;</span>
+
                 <h2>Добавить модель</h2>
+
                 <form id="add-model-form">
+
                     <br>
+
                     <label for="model-name">Скоро! :)</label>
+
                     <!-- <input type="text" id="model-name" placeholder="Введите название модели" required> -->
+
                     <!-- <label for="api-key">API ключ</label> -->
+
                     <!-- <input type="text" id="api-key" placeholder="Введите API ключ" required> -->
-                    <!-- <button type="submit">Добавить</button> -->
+
+                    <div class="tg-channel-button">
+                    <a href="https://t.me/gregorybaleportfolio" target="_blank" class="tg-link">
+                        Мой ТГ Канал
+                    </a>
+
                 </form>
+
                 <p id="error-message" style="color: red;"></p>
+
             </div>
+
         </div>        
+
     </div>
+
     <script src="script.js"></script>
+
     <script src="add_custom_model.js"></script>
+
 </body>
+
 </html>
