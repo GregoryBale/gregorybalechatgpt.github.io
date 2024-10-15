@@ -1,6 +1,6 @@
 # gregorybalechatgpt.github.io
 
-<h1>Chat AI Web Application</h1>
+<h1>gregorybalechatgpt</h1>
 
 <p>Это веб-приложение для чата с различными моделями искусственного интеллекта. Приложение позволяет пользователям общаться с разными AI моделями, сохранять историю чатов и переключаться между ними.</p>
 
@@ -110,6 +110,6 @@
 
 <h2>Контакты</h2>
 
-<p>Ваше Имя - <a href="https://twitter.com/your_twitter">@your_twitter</a> - email@example.com</p>
+<p>Ваше Имя - <a href="https://t.me/gregorybale">@gregorybale</a> - gregorymorozovidme@bk.ru</p>
 
-<p>Ссылка на проект: <a href="https://github.com/your-username/chat-ai-web-app">https://github.com/your-username/chat-ai-web-app</a></p>
+<p>Ссылка на проект: <a href="[https://github.com/your-username/chat-ai-web-app](https://github.com/GregoryBale/gregorybalechatgpt.github.io)">https://github.com/your-username/chat-ai-web-app</a></p>
