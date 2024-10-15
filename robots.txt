@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /register/
+Disallow: /add-model/     # Закрыто от индексации, если это внутренний сервис
+Disallow: /privacy-policy/ # Если не хотите индексировать политику конфиденциальности
+
+# Разрешить доступ к основным разделам
+Allow: /
+
+# Указание на карту сайта
+Sitemap: https://0imagegeneratorbygregorybale.netlify.app/sitemap.xml

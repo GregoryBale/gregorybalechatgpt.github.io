@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <!-- Главная страница -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  
+  <!-- Страница чата с ИИ -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/chat</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <!-- Страница настройки моделей -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/models</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Страница добавления пользовательских моделей -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/add-model</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Страница разработчика -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/developer</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+
+  <!-- Дополнительные страницы (если есть) -->
+  <url>
+    <loc>https://0imagegeneratorbygregorybale.netlify.app/privacy-policy</loc>
+    <lastmod>2024-10-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+</urlset>
