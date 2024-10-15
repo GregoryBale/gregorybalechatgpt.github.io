@@ -322,3 +322,8 @@ code {
 .button {
     display: inline-block;
 }
+.chat-footer {
+        position: sticky;
+        bottom: 0;
+        background-color: var(--tg-theme-bg-color);
+        z-index: 10;
