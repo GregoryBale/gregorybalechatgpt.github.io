@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="add_custom_model.css">
+   
     <!-- Yandex.RTB -->
     <script>window.yaContextCb=window.yaContextCb||[]</script>
     <script src="https://yandex.ru/ads/system/context.js" async></script>
@@ -27,18 +29,41 @@
                 </select>
             </div>            
         </aside>
-        <main class="chat-main">            
+        <main class="chat-main">
             <div id="chat-messages" class="chat-messages">
                 <!-- Сообщения будут добавляться здесь -->
             </div>
             <footer class="chat-footer">
                 <div class="chat-input-container">
+                    <button id="add-model-button" aria-label="Add custom model" title="Добавить новую модель">
+                        <i class="fas fa-plus"></i>
+                    </button>
                     <textarea id="user-input" placeholder="Введите ваше сообщение..."></textarea>
-                    <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                    <button id="send-message" aria-label="Send message" title="Отправить сообщение">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </footer>
         </main>
+        
+        <!-- Модальное окно для добавления пользовательской модели -->
+        <div id="add-model-modal" class="modal">
+            <div class="modal-content">
+                <span id="close-modal" class="close">&times;</span>
+                <h2>Добавить модель</h2>
+                <form id="add-model-form">
+                    <br>
+                    <label for="model-name">Скоро! :)</label>
+                    <!-- <input type="text" id="model-name" placeholder="Введите название модели" required> -->
+                    <!-- <label for="api-key">API ключ</label> -->
+                    <!-- <input type="text" id="api-key" placeholder="Введите API ключ" required> -->
+                    <!-- <button type="submit">Добавить</button> -->
+                </form>
+                <p id="error-message" style="color: red;"></p>
+            </div>
+        </div>        
     </div>
     <script src="script.js"></script>
+    <script src="add_custom_model.js"></script>
 </body>
 </html>
