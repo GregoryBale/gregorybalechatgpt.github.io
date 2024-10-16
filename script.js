@@ -12,10 +12,66 @@ let chats = JSON.parse(localStorage.getItem('chats')) || {};
 let messageCount = 0;
 
 const aiModels = {
-    'llama': 'https://paxsenix.serv00.net/v1/llama.php?text=',
-    'gemini': 'https://paxsenix.serv00.net/v1/gemini.php?text=',
-    'gpt3.5': 'https://paxsenix.serv00.net/v1/gpt3.5.php?text=',
-    'gpt4-32k': 'https://paxsenix.serv00.net/v1/gpt4-32k.php?text=',
+    'llama': {
+        url: 'https://paxsenix.serv00.net/v1/llama.php?text=',
+        responseType: 'response'
+    },
+    'gemini': {
+        url: 'https://paxsenix.serv00.net/v1/gemini.php?text=',
+        responseType: 'response'
+    },
+    'gpt3.5': {
+        url: 'https://paxsenix.serv00.net/v1/gpt3.5.php?text=',
+        responseType: 'response'
+    },
+    'gpt4-32k': {
+        url: 'https://paxsenix.serv00.net/v1/gpt4-32k.php?text=',
+        responseType: 'response'
+    },
+    'llama3': {
+        url: 'https://api.paxsenix.biz.id/ai/llama3?text=',
+        responseType: 'message'
+    },
+    'gpt3': {
+        url: 'https://api.paxsenix.biz.id/ai/gpt3?text=',
+        responseType: 'message'
+    },
+    'gpt4': {
+        url: 'https://api.paxsenix.biz.id/ai/gpt4?text=',
+        responseType: 'message'
+    },
+    'gpt4o': {
+        url: 'https://api.paxsenix.biz.id/ai/gpt4o?text=',
+        responseType: 'message'
+    },
+    'gpt4omni': {
+        url: 'https://api.paxsenix.biz.id/ai/gpt4omni?text=',
+        responseType: 'message'
+    },
+    'phi3': {
+        url: 'https://api.paxsenix.biz.id/ai/phi3?text=',
+        responseType: 'message'
+    },
+    'qwen2': {
+        url: 'https://api.paxsenix.biz.id/ai/qwen2?text=',
+        responseType: 'message'
+    },
+    'gemma': {
+        url: 'https://api.paxsenix.biz.id/ai/gemma?text=',
+        responseType: 'message'
+    },
+    'wizardlm': {
+        url: 'https://api.paxsenix.biz.id/ai/wizardlm?text=',
+        responseType: 'message'
+    },
+    'claude': {
+        url: 'https://api.paxsenix.biz.id/ai/claude?text=',
+        responseType: 'message'
+    },
+    'openchat': {
+        url: 'https://api.paxsenix.biz.id/ai/openchat?text=',
+        responseType: 'message'
+    }
 };
 
 function getRandomModel() {
@@ -35,7 +91,6 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
                 <div id="${adId}"></div>
             </div>
         `;
-        // Рендерим рекламу Яндекса
         window.yaContextCb.push(() => {
             Ya.Context.AdvManager.render({
                 "blockId": "R-A-12365980-1",
@@ -80,8 +135,28 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
 
     messageCount++;
     if (messageCount % 5 === 0 && !isAd) {
-        addMessage('', false, '', true); // Добавляем рекламу после каждого 5-го сообщения
+        addMessage('', false, '', true);
     }
+}
+
+async function processAPIResponse(data, model) {
+    if (!data.ok) {
+        throw new Error(data.message || 'API response not ok');
+    }
+
+    // Определяем тип ответа на основе модели
+    const responseType = aiModels[model].responseType;
+    
+    // Обрабатываем разные форматы ответов
+    if (responseType === 'message' && data.message) {
+        return data.message;
+    } else if (responseType === 'response' && data.response) {
+        return data.response;
+    } else if (data.text) {
+        return data.text;
+    }
+    
+    throw new Error('Неподдерживаемый формат ответа');
 }
 
 async function sendMessage() {
@@ -92,41 +167,40 @@ async function sendMessage() {
         userInput.value = '';
 
         const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
-        const apiUrl = aiModels[model];
+        const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
 
         try {
-            const response = await fetch(apiUrl + encodeURIComponent(message.replace(/ /g, '+')));
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error('API request failed');
             }
             const data = await response.json();
-            if (data.ok && data.response) {
-                addMessage(data.response, false, `Ответ получен от: ${model}`);
-            } else {
-                throw new Error('Invalid response format');
-            }
+            const responseMessage = await processAPIResponse(data, model);
+            addMessage(responseMessage, false, `Ответ получен от: ${model}`);
         } catch (error) {
             console.error('Error:', error);
             addMessage('Произошла ошибка при получении ответа. Попробуем другую модель.', false);
-            const newModel = getRandomModel();
-            const newApiUrl = aiModels[newModel];
-            try {
-                const newResponse = await fetch(newApiUrl + encodeURIComponent(message.replace(/ /g, '+')));
-                if (!newResponse.ok) {
-                    throw new Error('API request failed');
-                }
-                const newData = await newResponse.json();
-                if (newData.ok && newData.response) {
-                    addMessage(newData.response, false, `Ответ получен от: ${newModel} (после ошибки)`);
-                } else {
-                    throw new Error('Invalid response format');
-                }
-            } catch (newError) {
-                console.error('Error with new model:', newError);
-                addMessage('К сожалению, не удалось получить ответ. Пожалуйста, попробуйте позже.', false);
-            }
+            await retryWithAnotherModel(message);
         }
         updateChatHistory();
+    }
+}
+
+async function retryWithAnotherModel(message) {
+    const newModel = getRandomModel();
+    const newApiUrl = aiModels[newModel].url + encodeURIComponent(message.replace(/ /g, '+'));
+
+    try {
+        const newResponse = await fetch(newApiUrl);
+        if (!newResponse.ok) {
+            throw new Error('API request failed');
+        }
+        const newData = await newResponse.json();
+        const responseMessage = await processAPIResponse(newData, newModel);
+        addMessage(responseMessage, false, `Ответ получен от: ${newModel} (после ошибки)`);
+    } catch (newError) {
+        console.error('Error with new model:', newError);
+        addMessage('К сожалению, не удалось получить ответ. Пожалуйста, попробуйте позже.', false);
     }
 }
 
