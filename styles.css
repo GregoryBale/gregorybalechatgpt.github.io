@@ -327,3 +327,20 @@ code {
         bottom: 0;
         background-color: var(--tg-theme-bg-color);
         z-index: 10;
+}
+/* Стили для приветственного сообщения */
+.welcome-message {
+    background-color: #e8f5e9; /* Легкий зеленый фон */
+    color: #2e7d32; /* Темно-зеленый текст */
+    border: 1px solid #c8e6c9; /* Обводка */
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px; /* Отступ снизу */
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.welcome-message p {
+    margin: 0;
+    line-height: 1.5;
+}
