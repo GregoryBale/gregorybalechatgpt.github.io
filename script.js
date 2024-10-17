@@ -98,17 +98,12 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
                 "renderTo": adId
             });
         });
-    } else if (content.includes('```')) {
-        const parts = content.split('```');
-        parts.forEach((part, index) => {
-            if (index % 2 === 0) {
-                messageDiv.innerHTML += `<p>${part}</p>`;
-            } else {
-                messageDiv.innerHTML += `<pre><code>${part}</code></pre>`;
-            }
-        });
-    } else {
+    } else if (isUser) {
         messageDiv.textContent = content;
+    } else {
+        // Форматирование сообщений от ИИ
+        const formattedContent = formatAIMessage(content);
+        messageDiv.innerHTML = formattedContent;
     }
 
     if (!isUser && !isAd && aiInfo) {
@@ -138,6 +133,39 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
     if (messageCount % 5 === 0 && !isAd) {
         addMessage('', false, '', true);
     }
+}
+
+function formatAIMessage(content) {
+    // Форматирование жирного текста
+    content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Форматирование курсива
+    content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Форматирование подчеркнутого текста
+    content = content.replace(/__(.*?)__/g, '<u>$1</u>');
+    
+    // Форматирование зачеркнутого текста
+    content = content.replace(/~~(.*?)~~/g, '<del>$1</del>');
+    
+    // Форматирование ссылок
+    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    
+    // Форматирование цитат
+    content = content.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Форматирование кода
+    content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Форматирование блоков кода
+    content = content.replace(/```(\w+)?\n([\s\S]+?)\n```/g, (match, language, code) => {
+        return `<pre><code class="language-${language || ''}">${code.trim()}</code></pre>`;
+    });
+    
+    // Преобразование переносов строк в HTML
+    content = content.replace(/\n/g, '<br>');
+    
+    return content;
 }
 
 async function processAPIResponse(data, model) {

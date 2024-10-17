@@ -145,7 +145,25 @@ body {
     max-width: 60%; /* Ограничение ширины блока */
     width: fit-content; /* Ширина блока соответствует содержимому */
     overflow-wrap: break-word; /* Перенос длинных слов */
+    padding: 10px; /* Добавляем отступы для лучшего внешнего вида */
 }
+
+/* Стили для мобильных устройств */
+@media (max-width: 768px) {
+    .ai-message {
+        max-width: 80%; /* Увеличиваем ширину для мобильных */
+        width: 100%; /* Блок занимает всю ширину */
+        padding: 8px; /* Уменьшаем отступы */
+    }
+} 
+
+/* Стили для ПК */
+@media (min-width: 769px) {
+    .ai-message {
+        max-width: 60%; /* Максимальная ширина для ПК */
+    }
+}
+
 .ad-message {
     background-color: #ffd700;
     padding: 10px;
@@ -506,9 +524,8 @@ code {
 }
 /* Стили для приветственного сообщения */
 .welcome-message {
-    background-color: #e8f5e9; /* Легкий зеленый фон */
-    color: #2e7d32; /* Темно-зеленый текст */
-    border: 1px solid #c8e6c9; /* Обводка */
+    background-color: #ffffff; /* Легкий зеленый фон */
+    color: #0000000; /* Темно-зеленый текст */
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 20px; /* Отступ снизу */
@@ -695,4 +712,40 @@ code {
         opacity: 0;
         transform: translateY(-10px);
     }
+}
+/* Стили для сообщения с блокировкой рекламы */
+.adblock-message {
+    background-color: #ffcccc;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #d9534f;
+}
+
+/* Стили для кнопки "Поддержать" */
+.support-button {
+    background-color: #ff5c5c;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.support-button:hover {
+    background-color: #e04e4e;
+}
+
+/* Стили для ссылки */
+.support-link {
+    color: #d9534f;
+    text-decoration: underline;
+}
+
+.support-link:hover {
+    text-decoration: none;
 }
