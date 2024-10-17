@@ -1,7 +1,8 @@
 // add_custom_model.js
+
 const customAiModels = {
     async getResponse(model, message) {
-        const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
+        const customModels = JSON.parse(getCookie('customModels') || '{}');
         const apiKey = customModels[model];
         
         if (!apiKey) {
@@ -31,27 +32,37 @@ const customAiModels = {
     }
 };
 
-function loadCustomModels() {
-    const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
-    
-    Object.keys(customModels).forEach(model => {
-        if (!document.querySelector(`option[value="${model}"]`)) {
-            const option = document.createElement('option');
-            option.value = model;
-            option.textContent = model;
-            aiModelSelect.appendChild(option);
-        }
-    });
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     const addModelButton = document.getElementById('add-model-button');
     const modal = document.getElementById('add-model-modal');
-    const closeModal = document.getElementById('close-modal');
+    const closeModal = document.querySelector('.close');
     const addModelForm = document.getElementById('add-model-form');
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
     const customModelsList = document.getElementById('custom-models-list');
+    const aiModelSelect = document.querySelector('.model-select select');
+    const currentModelSpan = document.getElementById('current-model');
 
     const geminiModels = [
         "gemini-1.5-pro",
@@ -60,7 +71,20 @@ document.addEventListener('DOMContentLoaded', function() {
         "gemini-1.5-flash-8b"
     ];
 
-    function addModelToList(model, apiKey) {
+    function loadCustomModels() {
+        const customModels = JSON.parse(getCookie('customModels') || '{}');
+        
+        customModelsList.innerHTML = '';
+        
+        Object.keys(customModels).forEach(model => {
+            addModelToList(model);
+            if (!aiModelSelect.querySelector(`option[value="${model}"]`)) {
+                addModelToSelect(model);
+            }
+        });
+    }
+
+    function addModelToList(model) {
         const li = document.createElement('li');
         li.className = 'custom-model-item';
         li.innerHTML = `
@@ -75,18 +99,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function addModelToSelect(model) {
-        if (!document.querySelector(`option[value="${model}"]`)) {
-            const option = document.createElement('option');
-            option.value = model;
-            option.textContent = model;
-            aiModelSelect.appendChild(option);
-        }
+        const option = document.createElement('option');
+        option.value = model;
+        option.textContent = model;
+        aiModelSelect.appendChild(option);
     }
 
     function deleteCustomModel(model) {
-        const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
+        const customModels = JSON.parse(getCookie('customModels') || '{}');
         delete customModels[model];
-        localStorage.setItem('customModels', JSON.stringify(customModels));
+        setCookie('customModels', JSON.stringify(customModels), 30);
 
         const modelItem = customModelsList.querySelector(`li:has(button[data-model="${model}"])`);
         if (modelItem) modelItem.remove();
@@ -95,11 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (option) option.remove();
 
         if (currentModelSpan.textContent === model) {
-            const defaultOption = aiModelSelect.querySelector('option');
-            if (defaultOption) {
-                aiModelSelect.value = defaultOption.value;
-                currentModelSpan.textContent = defaultOption.textContent;
-            }
+            aiModelSelect.value = aiModelSelect.options[0].value;
+            currentModelSpan.textContent = aiModelSelect.options[0].textContent;
         }
     }
 
@@ -123,14 +142,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 });
 
-                const data = await response.json();
-                
                 if (response.ok) {
                     successfulModels.push(model);
                     
-                    const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
+                    const customModels = JSON.parse(getCookie('customModels') || '{}');
                     customModels[model] = apiKey;
-                    localStorage.setItem('customModels', JSON.stringify(customModels));
+                    setCookie('customModels', JSON.stringify(customModels), 30);
                 } else {
                     failedModels.push(model);
                 }
@@ -158,10 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorMessage.textContent = failedModels.length > 0 ? 
                     `Не удалось добавить модели: ${failedModels.join(', ')}` : '';
 
-                successfulModels.forEach(model => {
-                    addModelToList(model, apiKey);
-                    addModelToSelect(model);
-                });
+                loadCustomModels();
             } else {
                 errorMessage.textContent = 'Не удалось добавить ни одной модели. Проверьте API ключ.';
             }
@@ -171,14 +185,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    aiModelSelect.addEventListener('change', function() {
+        currentModelSpan.textContent = this.options[this.selectedIndex].text;
+    });
+
     // Инициализация при загрузке страницы
     loadCustomModels();
 
     // Обработчики модального окна
-    addModelButton.addEventListener('click', () => modal.style.display = 'block');
-    closeModal.addEventListener('click', () => modal.style.display = 'none');
+    addModelButton.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
     window.addEventListener('click', (e) => {
-        if (e.target == modal) modal.style.display = 'none';
+        if (e.target == modal) {
+            modal.style.display = 'none';
+        }
     });
 });
 
