@@ -69,41 +69,47 @@
             </footer>
         </main>
         <!-- Модальное окно для добавления пользовательской модели -->
-        <div id="add-model-modal" class="modal" aria-hidden="true">
-            <div class="modal-content">
-                <span id="close-modal" class="close" aria-label="Закрыть модальное окно">&times;</span>
-                <h2>Добавить модель</h2>
-                <form id="add-model-form">
-                    <label for="model-type">Выберите тип модели:</label>
-                    <select id="model-type">
-                        <option value="gemini">Gemini</option>
-                    </select>
-                    <label for="api-key">API ключ:</label>
-                    <input type="text" id="api-key" required>
-                    <button type="submit">Добавить</button>
-                </form>
-                <div id="error-message" class="error-message"></div>
-                <div id="success-message" class="success-message"></div>
-                <h3>Добавленные модели:</h3>
-                <ul id="custom-models-list"></ul>
-                <div class="tg-channel-button">
-                	<hr>
-                    <a href="https://t.me/gregorybaleportfolio" class="tg-link" target="_blank">
-                        Мой ТГ Канал
-                    </a>
-<p><br>Получить API ключ от Gemini можно: <a href="https://aistudio.google.com/app/apikey">Здесь!</a>
-Недоступно с российских IP (использование возможно). Нажмите "Create API Key", затем кнопку над полем поиска. Скопируйте ключ.
-Лимиты: 60 запросов/мин, 1 запрос/сек.</p>   
-                    <h2><br>Реклама<br><!-- Yandex.RTB R-A-12365980-2 -->
-<div id="yandex_rtb_R-A-12365980-2"></div>
-<script>
-window.yaContextCb.push(() => {
-    Ya.Context.AdvManager.render({
-        "blockId": "R-A-12365980-2",
-        "renderTo": "yandex_rtb_R-A-12365980-2"
-    })
-})
-</script></h2>
+<div id="add-model-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <span id="close-modal" class="close" aria-label="Закрыть модальное окно">&times;</span>
+        <h2>Добавить модель</h2>
+        <form id="add-model-form">
+            <label for="model-type">Выберите тип модели:</label>
+            <select id="model-type">
+                <option value="gemini">Gemini</option>
+            </select>
+            <label for="api-key">API ключ:</label>
+            <input type="text" id="api-key" required>
+            <button type="submit">Добавить</button>
+        </form>
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="success-message"></div>
+        <h3>Добавленные модели:</h3>
+        <ul id="custom-models-list"></ul>
+        <div class="tg-channel-button">
+            <hr>
+            <a href="https://t.me/gregorybaleportfolio" class="tg-link" target="_blank">
+                Мой ТГ Канал
+            </a>
+            <p><br>Получить API ключ от Gemini можно: 
+                <a href="https://aistudio.google.com/app/apikey">Здесь!</a>
+                Недоступно с российских IP (использование возможно). Нажмите "Create API Key", затем кнопку над полем поиска. Скопируйте ключ.
+                Лимиты: 60 запросов/мин, 1 запрос/сек.
+            </p>
+            <h2><br>Реклама<br>
+            <!-- Yandex.RTB R-A-12365980-2 -->
+            <div id="yandex_rtb_R-A-12365980-2"></div>
+            <script src="https://yastatic.net/pcode/adfox/loader.js" async></script>
+            <script>
+            window.yaContextCb = window.yaContextCb || [];
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    "blockId": "R-A-12365980-2",
+                    "renderTo": "yandex_rtb_R-A-12365980-2"
+                });
+            });
+            </script>
+            </h2>        
                 </div>
             </div>
         </div>
