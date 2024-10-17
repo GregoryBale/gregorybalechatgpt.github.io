@@ -275,6 +275,12 @@ code {
 }
 
 @media (max-width: 768px) {
+	    .sidebar-button {
+        display: none;
+    }
+	    #clear-chat-mobile {
+        display: block;
+    }
     .chat-app {
         flex-direction: column;
     }
@@ -296,6 +302,183 @@ code {
         background-color: var(--tg-theme-bg-color);
         z-index: 10;
     }
+/* Enhanced Mobile Menu Button */
+.mobile-menu-button {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: var(--tg-theme-button-color);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-button:hover {
+    transform: scale(1.05);
+    background-color: var(--tg-theme-button-color);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-menu-button span {
+    width: 24px;
+    height: 2px;
+    background-color: white;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-button span::before,
+.mobile-menu-button span::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background-color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-button span::before {
+    transform: translateY(-8px);
+}
+
+.mobile-menu-button span::after {
+    transform: translateY(8px);
+}
+
+.mobile-menu-button.active span {
+    background-color: transparent;
+}
+
+.mobile-menu-button.active span::before {
+    transform: rotate(45deg);
+}
+
+.mobile-menu-button.active span::after {
+    transform: rotate(-45deg);
+}
+
+/* Enhanced Mobile Menu */
+.mobile-menu {
+    display: flex;   
+    flex-direction: column; /* Элементы располагаются по вертикали */
+    justify-content: flex-start; /* Все элементы будут прижаты к верху */
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 360px;
+    height: 100vh;
+    background-color: rgba(var(--tg-theme-bg-color), 0.98);
+    backdrop-filter: blur(20px);
+    z-index: 999;
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 20px;
+}
+
+.mobile-menu.active {
+    left: 0;
+    transform: translateX(0);
+}
+
+/* Mobile Menu Header */
+.mobile-menu-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(var(--tg-theme-text-color), 0.1);
+    margin-bottom: 20px;
+}
+
+.mobile-menu-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--tg-theme-text-color);
+    margin-bottom: 8px;
+}
+
+/* Mobile Menu Select */
+.mobile-menu .model-select {
+    margin-bottom: 24px;
+}
+
+.mobile-menu select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--tg-theme-text-color), 0.1);
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu select:focus {
+    outline: none;
+    border-color: var(--tg-theme-button-color);
+    box-shadow: 0 0 0 2px rgba(var(--tg-theme-button-color), 0.2);
+}
+
+/* Mobile Menu Button */
+#clear-chat-mobile {
+    width: 100%;
+    padding: 14px;
+    background-color: rgba(var(--tg-theme-button-color), 0.1);
+    color: var(--tg-theme-button-color);
+    border: 1px solid var(--tg-theme-button-color);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;    
+    margin-top: 0; /* Убираем лишний отступ */
+    align-self: flex-start; /* Выравниваем кнопку вверху */
+}
+
+#clear-chat-mobile:hover {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+
+/* Mobile Menu Background Overlay */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+    #clear-chat {
+    	display: fix;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #f0f2f5;
+        border-radius: 5px;
+        text-align: center;
+    }
+}
 }
 .chat-actions {
     display: flex;
@@ -343,4 +526,71 @@ code {
 .welcome-message p {
     margin: 0;
     line-height: 1.5;
+}
+@media (max-width: 769px) {
+    .sidebar {
+        display: none;
+    }
+    
+    .chat-main {
+        max-width: 100%;
+    }
+}
+
+.sidebar-header #clear-chat {
+    display: none;
+}
+
+@media (min-width: 769px) {
+	    #new-chat {
+        display: none;
+    }
+	    .mobile-menu-button, .mobile-menu, .mobile-menu-overlay {
+        display: none;
+    }
+    .sidebar-header #clear-chat {
+        display: inline-block;
+        background: none;
+        border: none;
+        color: var(--tg-theme-hint-color);
+        cursor: pointer;
+        font-size: 14px;
+        transition: color 0.3s;
+        margin-left: 10px;
+    }
+
+    .sidebar-header #clear-chat:hover {
+        color: #d32f2f;
+    }
+}
+
+.sidebar-button {
+    background: none;
+    border: none;
+    color: var(--tg-theme-hint-color);
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.3s;
+    margin-left: 10px;
+}
+
+.sidebar-button:hover {
+    color: var(--tg-theme-link-color);
+}
+
+.add-model-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.add-model-button:hover {
+    background-color: #4a7ab0;
 }

@@ -305,3 +305,54 @@ addMessage = function(content, isUser = false, aiInfo = '', isAd = false) {
     highlightCode();
 };
 
+// Мобильное меню
+const mobileMenuButton = document.querySelector('.mobile-menu-button');
+const mobileMenu = document.querySelector('.mobile-menu');
+const currentModelMobile = document.getElementById('current-model-mobile');
+const aiModelSelectMobile = document.getElementById('ai-model-select-mobile');
+const clearChatMobile = document.getElementById('clear-chat-mobile');
+
+// Клонируем опции из основного селекта в мобильный
+Array.from(aiModelSelect.options).forEach(option => {
+    const newOption = option.cloneNode(true);
+    aiModelSelectMobile.appendChild(newOption);
+});
+
+// Обработчик для кнопки мобильного меню
+mobileMenuButton.addEventListener('click', () => {
+    mobileMenuButton.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+});
+
+// Синхронизация выбора модели между мобильной и десктопной версиями
+aiModelSelectMobile.addEventListener('change', (e) => {
+    selectedModel = e.target.value;
+    aiModelSelect.value = e.target.value;
+    currentModelSpan.textContent = e.target.options[e.target.selectedIndex].text;
+    currentModelMobile.textContent = e.target.options[e.target.selectedIndex].text;
+});
+
+// Обработчик для мобильной кнопки очистки чата
+clearChatMobile.addEventListener('click', () => {
+    if (currentChatId) {
+        chatMessages.innerHTML = '';
+        chats[currentChatId].messages = [];
+        messageCount = 0;
+        saveChatToLocalStorage();
+    }
+    mobileMenu.classList.remove('active');
+    mobileMenuButton.classList.remove('active');
+});
+
+// Закрытие мобильного меню при клике вне его
+document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+        mobileMenu.classList.remove('active');
+        mobileMenuButton.classList.remove('active');
+    }
+});
+
+// Синхронизация начального состояния
+document.addEventListener('DOMContentLoaded', () => {
+    currentModelMobile.textContent = aiModelSelect.options[aiModelSelect.selectedIndex].text;
+});
