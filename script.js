@@ -164,7 +164,7 @@ async function sendMessage() {
     if (message) {
         addMessage(message, true);
         userInput.value = '';
-
+        showTypingIndicator();
         const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
         
         try {
@@ -173,20 +173,24 @@ async function sendMessage() {
             const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
             if (customModels[model]) {
                 responseMessage = await customAiModels.getResponse(model, message);
+                hideTypingIndicator();
             } else {
                 const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
                 const response = await fetch(apiUrl);
+                hideTypingIndicator();
                 if (!response.ok) {
                     throw new Error('API request failed');
+                    hideTypingIndicator();
                 }
                 const data = await response.json();
                 responseMessage = await processAPIResponse(data, model);
+                hideTypingIndicator();
             }
             
-            addMessage(responseMessage, false, `Ответ получен от: ${model}`);
+            addMessage(responseMessage, false, `🤖 Ответ получен от: ${model}`);
         } catch (error) {
             console.error('Error:', error);
-            addMessage('Произошла ошибка при получении ответа. Попробуем другую модель.', false);
+            addMessage('🔄 Произошла ошибка при получении ответа. Пробую другую модель.', false);
             await retryWithAnotherModel(message);
         }
         updateChatHistory();
@@ -204,10 +208,10 @@ async function retryWithAnotherModel(message) {
         }
         const newData = await newResponse.json();
         const responseMessage = await processAPIResponse(newData, newModel);
-        addMessage(responseMessage, false, `Ответ получен от: ${newModel} (после ошибки)`);
+        addMessage(responseMessage, false, `🤖 Ответ получен от: ${newModel} (после ошибки)`);
     } catch (newError) {
         console.error('Error with new model:', newError);
-        addMessage('К сожалению, не удалось получить ответ. Пожалуйста, попробуйте позже.', false);
+        addMessage('😔 К сожалению, не удалось получить ответ. Пожалуйста, попробуйте другой модель.', false);
     }
 }
 
@@ -356,3 +360,62 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     currentModelMobile.textContent = aiModelSelect.options[aiModelSelect.selectedIndex].text;
 });
+
+const voiceInputButton = document.getElementById('voice-input-button');
+
+voiceInputButton.addEventListener('click', startVoiceInput);
+
+function startVoiceInput() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = 'ru-RU';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    const speechResult = event.results[0][0].transcript;
+    userInput.value = speechResult;
+    sendMessage();
+  };
+
+  recognition.onerror = function(event) {
+    console.error('Speech recognition error', event.error);
+  };
+}
+
+function showTypingIndicator() {
+    // Создаем индикатор набора текста
+    const typingIndicator = document.createElement('div');
+    typingIndicator.classList.add('typing-indicator');
+
+    const phrases = [
+        "ИИ думает...",
+        "Обрабатываем запрос...",
+        "Подождите немного...",
+        "Секунду..."
+    ];
+
+    let phraseIndex = 0;
+
+    const phraseSpan = document.createElement('span');
+    phraseSpan.classList.add('typing-phrase');
+    phraseSpan.textContent = phrases[phraseIndex];
+
+    typingIndicator.appendChild(phraseSpan);
+    chatMessages.appendChild(typingIndicator);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Меняем фразы каждые 2 секунды
+    const intervalId = setInterval(() => {
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        phraseSpan.textContent = phrases[phraseIndex];
+    }, 1000);
+}
+
+function hideTypingIndicator() {
+  const typingIndicator = document.querySelector('.typing-indicator');
+  if (typingIndicator) {
+    typingIndicator.remove();
+  }
+}
