@@ -2,7 +2,7 @@
 
 const customAiModels = {
     async getResponse(model, message) {
-        const customModels = JSON.parse(getCookie('customModels') || '{}');
+        const customModels = JSON.parse(localStorage.getItem('customModels') || '{}');
         const apiKey = customModels[model];
         
         if (!apiKey) {
@@ -32,27 +32,6 @@ const customAiModels = {
     }
 };
 
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for(let i=0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const addModelButton = document.getElementById('add-model-button');
     const modal = document.getElementById('add-model-modal');
@@ -61,8 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
     const customModelsList = document.getElementById('custom-models-list');
-    const aiModelSelect = document.querySelector('.model-select select');
-    const currentModelSpan = document.getElementById('current-model');
+    const aiModelSelects = document.querySelectorAll('.model-select select');
+    const currentModelSpans = document.querySelectorAll('#current-model, #current-model-mobile');
 
     const geminiModels = [
         "gemini-1.5-pro",
@@ -72,15 +51,17 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     function loadCustomModels() {
-        const customModels = JSON.parse(getCookie('customModels') || '{}');
+        const customModels = JSON.parse(localStorage.getItem('customModels') || '{}');
         
         customModelsList.innerHTML = '';
         
         Object.keys(customModels).forEach(model => {
             addModelToList(model);
-            if (!aiModelSelect.querySelector(`option[value="${model}"]`)) {
-                addModelToSelect(model);
-            }
+            aiModelSelects.forEach(select => {
+                if (!select.querySelector(`option[value="${model}"]`)) {
+                    addModelToSelect(select, model);
+                }
+            });
         });
     }
 
@@ -98,28 +79,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function addModelToSelect(model) {
+    function addModelToSelect(select, model) {
         const option = document.createElement('option');
         option.value = model;
         option.textContent = model;
-        aiModelSelect.appendChild(option);
+        select.appendChild(option);
     }
 
     function deleteCustomModel(model) {
-        const customModels = JSON.parse(getCookie('customModels') || '{}');
+        const customModels = JSON.parse(localStorage.getItem('customModels') || '{}');
         delete customModels[model];
-        setCookie('customModels', JSON.stringify(customModels), 30);
+        localStorage.setItem('customModels', JSON.stringify(customModels));
 
         const modelItem = customModelsList.querySelector(`li:has(button[data-model="${model}"])`);
         if (modelItem) modelItem.remove();
 
-        const option = aiModelSelect.querySelector(`option[value="${model}"]`);
-        if (option) option.remove();
+        aiModelSelects.forEach(select => {
+            const option = select.querySelector(`option[value="${model}"]`);
+            if (option) option.remove();
+        });
 
-        if (currentModelSpan.textContent === model) {
-            aiModelSelect.value = aiModelSelect.options[0].value;
-            currentModelSpan.textContent = aiModelSelect.options[0].textContent;
-        }
+        currentModelSpans.forEach(span => {
+            if (span.textContent === model) {
+                const defaultModel = aiModelSelects[0].options[0].value;
+                aiModelSelects.forEach(select => select.value = defaultModel);
+                span.textContent = aiModelSelects[0].options[0].textContent;
+            }
+        });
     }
 
     async function testAndAddGeminiModels(apiKey) {
@@ -145,9 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     successfulModels.push(model);
                     
-                    const customModels = JSON.parse(getCookie('customModels') || '{}');
+                    const customModels = JSON.parse(localStorage.getItem('customModels') || '{}');
                     customModels[model] = apiKey;
-                    setCookie('customModels', JSON.stringify(customModels), 30);
+                    localStorage.setItem('customModels', JSON.stringify(customModels));
                 } else {
                     failedModels.push(model);
                 }
@@ -185,20 +171,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    aiModelSelect.addEventListener('change', function() {
-        currentModelSpan.textContent = this.options[this.selectedIndex].text;
+    aiModelSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const selectedModel = this.options[this.selectedIndex].text;
+            currentModelSpans.forEach(span => span.textContent = selectedModel);
+            aiModelSelects.forEach(otherSelect => {
+                if (otherSelect !== this) {
+                    otherSelect.value = this.value;
+                }
+            });
+        });
     });
 
     // Инициализация при загрузке страницы
     loadCustomModels();
 
     // Обработчики модального окна
-    addModelButton.addEventListener('click', () => {
-        modal.style.display = 'block';
-    });
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    if (addModelButton) {
+        addModelButton.addEventListener('click', () => {
+            modal.style.display = 'block';
+        });
+    }
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
     window.addEventListener('click', (e) => {
         if (e.target == modal) {
             modal.style.display = 'none';
