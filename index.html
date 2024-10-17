@@ -29,33 +29,33 @@
                 <label for="ai-model-select" class="model-label">Выбор модели ИИ:</label>
                 <select id="ai-model-select" aria-label="Выбор модели ИИ">
                     <option value="random">Случайный ИИ</option>
-<option value="llama">Лама 2</option>
-<option value="llama3">Лама 3</option>
-<option value="gemini">Gemini AI</option>
-<option value="gpt3.5">GPT-3.5</option>
-<option value="gpt4-32k">GPT-4 32k</option>
-<option value="gpt3">GPT-3</option>
-<option value="gpt4">GPT-4</option>
-<option value="gpt4o">GPT-4o</option>
-<option value="gpt4omni">GPT-4 Omni</option>
-<option value="phi3">Phi 3</option>
-<option value="qwen2">Qwen 2</option>
-<option value="gemma">Gemma AI</option>
-<option value="wizardlm">WizardLM</option>
-<option value="openchat">OpenChat</option>
-<option value="claude">Claude</option>
+                    <option value="llama">Лама 2</option>
+                    <option value="llama3">Лама 3</option>
+                    <option value="gemini">Gemini AI</option>
+                    <option value="gpt3.5">GPT-3.5</option>
+                    <option value="gpt4-32k">GPT-4 32k</option>
+                    <option value="gpt3">GPT-3</option>
+                    <option value="gpt4">GPT-4</option>
+                    <option value="gpt4o">GPT-4o</option>
+                    <option value="gpt4omni">GPT-4 Omni</option>
+                    <option value="phi3">Phi 3</option>
+                    <option value="qwen2">Qwen 2</option>
+                    <option value="gemma">Gemma AI</option>
+                    <option value="wizardlm">WizardLM</option>
+                    <option value="openchat">OpenChat</option>
+                    <option value="claude">Claude</option>
                 </select>
             </div>
         </aside>
         <!-- Основная часть чата -->
         <main class="chat-main">
             <div id="chat-messages" class="chat-messages" aria-live="polite" role="log">
-    <!-- Приветственное сообщение -->
-    <div class="message welcome-message ai-message">
-        <p>Здравствуйте! Мы рады сообщить, что наш проект полностью бесплатный и предоставляет доступ ко всем моделям ИИ без каких-либо затрат. Мы постоянно работаем над улучшением сайта и добавляем новые модели. На сайте присутствует реклама — это единственный способ монетизировать проект и поддерживать его бесплатность. Спасибо, что выбрали нас! ❤️ (версия сайта 0.14 бета) Если у вас появились вопросы или предложения, напишите мне в ТГ @gregorybale</p>
-    </div>
-    <!-- Другие сообщения будут добавляться здесь -->
-</div>
+                <!-- Приветственное сообщение -->
+                <div class="message welcome-message ai-message">
+                    <p>Здравствуйте! Мы рады сообщить, что наш проект полностью бесплатный и предоставляет доступ ко всем моделям ИИ без каких-либо затрат. Мы постоянно работаем над улучшением сайта и добавляем новые модели. На сайте присутствует реклама — это единственный способ монетизировать проект и поддерживать его бесплатность. Спасибо, что выбрали нас! ❤️ (версия сайта 0.14 бета)</p>
+                </div>
+                <!-- Другие сообщения будут добавляться здесь -->
+            </div>
             <footer class="chat-footer">
                 <div class="chat-input-container">
                     <button id="add-model-button" aria-label="Добавить новую модель" title="Добавить новую модель">
@@ -74,14 +74,24 @@
                 <span id="close-modal" class="close" aria-label="Закрыть модальное окно">&times;</span>
                 <h2>Добавить модель</h2>
                 <form id="add-model-form">
-                    <label for="model-name">Скоро! :)</label>
-                    <div class="tg-channel-button">
-                        <a href="https://t.me/gregorybaleportfolio" target="_blank" class="tg-link">
-                            Мой ТГ Канал
-                        </a>
-                    </div>
+                    <label for="model-type">Выберите тип модели:</label>
+                    <select id="model-type">
+                        <option value="gemini">Gemini</option>
+                    </select>
+                    <label for="api-key">API ключ:</label>
+                    <input type="text" id="api-key" required>
+                    <button type="submit">Добавить</button>
                 </form>
-                <p id="error-message" style="color: red;"></p>
+                <div id="error-message" class="error-message"></div>
+                <div id="success-message" class="success-message"></div>
+                <h3>Добавленные модели:</h3>
+                <ul id="custom-models-list"></ul>
+                <div class="tg-channel-button">
+                	<hr>
+                    <a href="https://t.me/gregorybaleportfolio" class="tg-link" target="_blank">
+                        Мой ТГ Канал
+                    </a>
+                </div>
             </div>
         </div>
     </div>

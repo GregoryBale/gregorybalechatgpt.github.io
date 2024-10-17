@@ -62,6 +62,7 @@
 }
 
 #add-model-form input,
+#add-model-form select,
 #add-model-form button {
     margin-bottom: 10px;
     padding: 10px;
@@ -78,6 +79,25 @@
 
 #add-model-form button:hover {
     background-color: #4a7ab0;
+}
+
+.error-message {
+    color: #ff0000;
+    margin-top: 10px;
+}
+
+.success-message {
+    color: #00ff00;
+    margin-top: 10px;
+}
+
+#custom-models-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#custom-models-list li {
+    margin-bottom: 5px;
 }
 
 @media (max-width: 768px) {
