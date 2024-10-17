@@ -1,3 +1,4 @@
+// script.js
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-message');
@@ -144,10 +145,8 @@ async function processAPIResponse(data, model) {
         throw new Error(data.message || 'API response not ok');
     }
 
-    // Определяем тип ответа на основе модели
-    const responseType = aiModels[model].responseType;
+    const responseType = aiModels[model]?.responseType || 'response';
     
-    // Обрабатываем разные форматы ответов
     if (responseType === 'message' && data.message) {
         return data.message;
     } else if (responseType === 'response' && data.response) {
@@ -167,15 +166,23 @@ async function sendMessage() {
         userInput.value = '';
 
         const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
-        const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
-
+        
         try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-                throw new Error('API request failed');
+            let responseMessage;
+            
+            const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
+            if (customModels[model]) {
+                responseMessage = await customAiModels.getResponse(model, message);
+            } else {
+                const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                const data = await response.json();
+                responseMessage = await processAPIResponse(data, model);
             }
-            const data = await response.json();
-            const responseMessage = await processAPIResponse(data, model);
+            
             addMessage(responseMessage, false, `Ответ получен от: ${model}`);
         } catch (error) {
             console.error('Error:', error);
@@ -281,6 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         loadChat(Object.keys(chats)[0]);
     }
+    
+    // Загрузка кастомных моделей при инициализации
+    loadCustomModels();
 });
 
 function highlightCode() {
@@ -294,3 +304,4 @@ addMessage = function(content, isUser = false, aiInfo = '', isAd = false) {
     originalAddMessage(content, isUser, aiInfo, isAd);
     highlightCode();
 };
+
