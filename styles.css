@@ -749,3 +749,39 @@ code {
 .support-link:hover {
     text-decoration: none;
 }
+    .message img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .download-button {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #EFEFEF;
+        color: black;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+
+    .download-button:hover {
+        background-color: #45a049;
+    }
+    
+    
+    .message-with-image img {
+    max-width: 100%; /* Ограничиваем ширину изображения до 100% */
+    height: auto; /* Высота автоматически подстраивается под ширину */
+    object-fit: cover; /* Обеспечиваем обрезку изображения по размеру контейнера */
+    border-radius: 10px; /* Скругляем углы */
+    margin-bottom: 20px; /* Отступ снизу */
+}
+
+@media (min-width: 768px) { /* Для экранов шире 768px */
+    .message-with-image img {
+        max-width: auto; /* Ограничиваем ширину изображения до 50% на больших экранах */
+        height: auto; /* Сохраняем автоматическую высоту */
+    }
+}

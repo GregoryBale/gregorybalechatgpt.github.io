@@ -1,4 +1,3 @@
-// script.js
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-message');
@@ -74,6 +73,45 @@ const aiModels = {
         responseType: 'message'
     }
 };
+
+const imageGenerationApis = [
+    { url: 'https://api.paxsenix.biz.id/ai-image/fluxSchnell?text=', name: 'FluxSchnell' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/fluxPro?text=', name: 'FluxPro' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/sdxlImage?text=', name: 'SDXL Image' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/sdxlBeta?text=', name: 'SDXL Beta' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/magicstudio?text=', name: 'Magic Studio' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/prodia?text=', name: 'Prodia' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/upscale?text=', name: 'Upscale' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/blackbox?text=', name: 'Blackbox' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/dreamshaper?text=', name: 'Dreamshaper' }
+];
+
+async function tryGenerateImage(api, prompt) {
+    try {
+        const response = await fetch(api.url + encodeURIComponent(prompt));
+        const data = await response.json();
+        
+        if (data.ok && data.url) {
+            return { ok: true, url: data.url, model: api.name };
+        }
+    } catch (error) {
+        console.error(`Error with ${api.name}:`, error);
+    }
+    return { ok: false };
+}
+
+async function generateImage(prompt) {
+    const shuffledApis = [...imageGenerationApis].sort(() => Math.random() - 0.5);
+
+    for (const api of shuffledApis) {
+        const result = await tryGenerateImage(api, prompt);
+        if (result.ok) {
+            return result;
+        }
+    }
+
+    return { ok: false, error: "😔 Не удалось сгенерировать изображение ни с одной из доступных API." };
+}
 
 function getRandomModel() {
     const models = Object.keys(aiModels);
@@ -193,42 +231,80 @@ async function sendMessage() {
         addMessage(message, true);
         userInput.value = '';
         showTypingIndicator();
-        const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
-        
+
         try {
-            let responseMessage;
-            
-            const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
-            if (customModels[model]) {
-                responseMessage = await customAiModels.getResponse(model, message);
-                hideTypingIndicator();
+            if (message.startsWith('/image ')) {
+                await handleImageGeneration(message);
             } else {
-                const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
-                const response = await fetch(apiUrl);
-                hideTypingIndicator();
-                if (!response.ok) {
-                    throw new Error('API request failed');
-                    hideTypingIndicator();
+                const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
+                let responseMessage;
+                
+                const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
+                if (customModels[model]) {
+                    responseMessage = await customAiModels.getResponse(model, message);
+                } else {
+                    const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error('API request failed');
+                    }
+                    const data = await response.json();
+                    responseMessage = await processAPIResponse(data, model);
                 }
-                const data = await response.json();
-                responseMessage = await processAPIResponse(data, model);
-                hideTypingIndicator();
+                
+                addMessage(responseMessage, false, `🤖 Ответ получен от: ${model}`);
             }
-            
-            addMessage(responseMessage, false, `🤖 Ответ получен от: ${model}`);
         } catch (error) {
             console.error('Error:', error);
-            addMessage('🔄 Произошла ошибка при получении ответа. Пробую другую модель.', false);
-            await retryWithAnotherModel(message);
+            if (message.startsWith('/image ')) {
+                addMessage("Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
+            } else {
+                addMessage('🔄 Произошла ошибка при получении ответа. Пробую другую модель.', false);
+                await retryWithAnotherModel(message);
+            }
+        } finally {
+            hideTypingIndicator();
         }
+        
         updateChatHistory();
+    }
+}
+
+async function handleImageGeneration(message) {
+    const prompt = message.slice(7).trim(); // Удаляем '/image ' из начала сообщения
+    addMessage(`Генерация изображения для запроса: "${prompt}"`, false);
+
+    try {
+        const translationResponse = await fetch(`https://paxsenix.serv00.net/v1/gpt3.5.php?text=${encodeURIComponent(`переведи текст на английский ${prompt}`)}`);
+        const translationData = await translationResponse.json();
+        
+        if (translationData.ok) {
+            const englishPrompt = translationData.response.replace(/^"|"$/g, ''); // Удаляем кавычки
+            const imageResult = await generateImage(englishPrompt);
+            
+            if (imageResult.ok) {
+                const imageMessage = `
+                    <img src="${imageResult.url}" alt="Сгенерированное изображение" style="max-width: 100%; height: auto;">
+                    <p>Изображение сгенерировано с помощью модели: ${imageResult.model}</p>
+                    <a href="${imageResult.url}" download="generated_image.png" class="download-button">Скачать изображение</a>
+                `;
+                addMessage(imageMessage, false);
+            } else {
+                addMessage("Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
+            }
+        } else {
+            addMessage("Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        addMessage("Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
     }
 }
 
 async function retryWithAnotherModel(message) {
     const newModel = getRandomModel();
     const newApiUrl = aiModels[newModel].url + encodeURIComponent(message.replace(/ /g, '+'));
-
+    
     try {
         const newResponse = await fetch(newApiUrl);
         if (!newResponse.ok) {
