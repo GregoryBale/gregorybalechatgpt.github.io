@@ -26,7 +26,6 @@
 <button class="mobile-menu-button">
     <span></span>
 </button>
-
 <div class="mobile-menu">
     <div class="mobile-menu-header">
         <h1>Чат с ИИ (<span id="current-model-mobile">Выберите модель</span>)</h1>
@@ -36,8 +35,12 @@
             <!-- Те же опции, что и в основном селекте -->
         </select>
     </div>
-    <button id="clear-chat-mobile">Очистить чат</button>
-    <button id="infoforupdates-mobile">Список обновлений</button>
+<button id="infoforupdates-mobile">
+    <i class="fas fa-list"></i> Список обновлений
+</button>
+<button id="clear-chat-mobile-red">
+    <i class="fas fa-trash-alt"></i> Очистить чат
+</button>
 </div>
         <!-- Боковая панель с выбором ИИ -->
         <aside class="sidebar">
@@ -49,6 +52,7 @@
             </header>
             <div class="model-select">
                 <label for="ai-model-select" class="model-label">Выбор модели ИИ:</label>
+                <p><br></p>
                 <select id="ai-model-select" aria-label="Выбор модели ИИ">
                     <option value="random">Случайный ИИ</option>
                     <option value="llama">Лама 2</option>
