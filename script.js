@@ -1,3 +1,21 @@
+// Функция для безопасного получения элемента DOM
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.error(`Элемент с id "${id}" не найден`);
+    }
+    return element;
+}
+
+// Функция для безопасного добавления слушателя событий
+function safeAddEventListener(element, event, handler) {
+    if (element) {
+        element.addEventListener(event, handler);
+    } else {
+        console.error(`Не удалось добавить обработчик события ${event}`);
+    }
+}
+
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-message');
@@ -5,6 +23,49 @@ const clearButton = document.getElementById('clear-chat');
 const aiModelSelect = document.getElementById('ai-model-select');
 const currentModelSpan = document.getElementById('current-model');
 const chatHistory = document.getElementById('chat-history');
+
+function safeAddEventListener(element, event, handler) {
+    if (element) {
+        element.addEventListener(event, handler);
+    } else {
+        console.error(`Не удалось добавить обработчик события ${event}`);
+    }
+}
+
+safeAddEventListener(sendButton, 'click', () => {
+    if (typeof sendMessage === 'function') {
+        sendMessage().catch(console.error);
+    } else {
+        console.error('Функция sendMessage не определена');
+    }
+});
+
+safeAddEventListener(userInput, 'keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (typeof sendMessage === 'function') {
+            sendMessage().catch(console.error);
+        } else {
+            console.error('Функция sendMessage не определена');
+        }
+    }
+});
+
+safeAddEventListener(clearButton, 'click', () => {
+    if (currentChatId && chatMessages) {
+        chatMessages.innerHTML = '';
+        chats[currentChatId].messages = [];
+        messageCount = 0;
+        saveChatToLocalStorage();
+    }
+});
+
+safeAddEventListener(aiModelSelect, 'change', (e) => {
+    selectedModel = e.target.value;
+    if (currentModelSpan) {
+        currentModelSpan.textContent = e.target.options[e.target.selectedIndex].text;
+    }
+});
 
 let selectedModel = 'random';
 let currentChatId = null;
@@ -119,6 +180,11 @@ function getRandomModel() {
 }
 
 function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
+    if (!chatMessages) {
+        console.error('Элемент chatMessages не найден');
+        return;
+    }
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', isUser ? 'user-message' : isAd ? 'ad-message' : 'ai-message');
     
@@ -130,17 +196,25 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
                 <div id="${adId}"></div>
             </div>
         `;
-        window.yaContextCb.push(() => {
-            Ya.Context.AdvManager.render({
-                "blockId": "R-A-12365980-1",
-                "renderTo": adId
+        if (window.yaContextCb && typeof window.yaContextCb.push === 'function') {
+            window.yaContextCb.push(() => {
+                if (Ya && Ya.Context && Ya.Context.AdvManager && typeof Ya.Context.AdvManager.render === 'function') {
+                    Ya.Context.AdvManager.render({
+                        "blockId": "R-A-12365980-1",
+                        "renderTo": adId
+                    });
+                } else {
+                    console.error('Yandex.Direct API не доступен');
+                }
             });
-        });
+        } else {
+            console.error('window.yaContextCb не найден или не является массивом');
+        }
     } else if (isUser) {
         messageDiv.textContent = content;
     } else {
         // Форматирование сообщений от ИИ
-        const formattedContent = formatAIMessage(content);
+        const formattedContent = typeof formatAIMessage === 'function' ? formatAIMessage(content) : content;
         messageDiv.innerHTML = formattedContent;
     }
 
@@ -155,7 +229,11 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     if (currentChatId && !isAd) {
-        if (!chats[currentChatId].messages) {
+        if (!chats[currentChatId]) {
+            console.error('Текущий чат не найден');
+            return;
+        }
+        if (!Array.isArray(chats[currentChatId].messages)) {
             chats[currentChatId].messages = [];
         }
         chats[currentChatId].messages.push({
@@ -164,14 +242,39 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
             aiInfo,
             isAd: false
         });
-        saveChatToLocalStorage();
+        try {
+            saveChatToLocalStorage();
+        } catch (error) {
+            console.error('Ошибка при сохранении чата в localStorage:', error);
+        }
     }
 
-    messageCount++;
-    if (messageCount % 5 === 0 && !isAd) {
-        addMessage('', false, '', true);
+    if (typeof messageCount !== 'undefined') {
+        messageCount++;
+        if (messageCount % 5 === 0 && !isAd) {
+            addMessage('', false, '', true);
+        }
+    } else {
+        console.error('messageCount не определен');
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (currentModelSpan && aiModelSelect) {
+        currentModelSpan.textContent = aiModelSelect.options[aiModelSelect.selectedIndex].text;
+    }
+    updateChatHistory();
+    if (Object.keys(chats).length === 0) {
+        createNewChat();
+    } else {
+        loadChat(Object.keys(chats)[0]);
+    }
+    
+    // Загрузка кастомных моделей при инициализации
+    if (typeof loadCustomModels === 'function') {
+        loadCustomModels();
+    }
+});
 
 function formatAIMessage(content) {
     // Форматирование жирного текста
@@ -366,11 +469,14 @@ function ensureCurrentChat() {
     }
 }
 
-sendButton.addEventListener('click', sendMessage);
+sendButton.addEventListener('click', () => {
+    sendMessage().catch(console.error);
+});
+
 userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        sendMessage();
+        sendMessage().catch(console.error);
     }
 });
 
