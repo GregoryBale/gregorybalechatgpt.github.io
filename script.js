@@ -105,10 +105,6 @@ const aiModels = {
         url: 'https://api.paxsenix.biz.id/ai/gpt4o?text=',
         responseType: 'message'
     },
-    'gpt4omni': {
-        url: 'https://api.paxsenix.biz.id/ai/gpt4omni?text=',
-        responseType: 'message'
-    },
     'phi3': {
         url: 'https://api.paxsenix.biz.id/ai/phi3?text=',
         responseType: 'message'
@@ -598,18 +594,6 @@ function showTypingIndicator() {
     // Создаем индикатор набора текста
     const typingIndicator = document.createElement('div');
     typingIndicator.classList.add('typing-indicator');
-
-    const phrases = [
-        "▓енерация",
-        "Г▒нерация",
-        "Ге░ерация",
-        "Ген█рация",
-        "Генер▀ция",
-        "Генера▄ия",
-        "Генерац▌я",
-        "Генерация",
-        "Генераци■"
-    ];
 
     let phraseIndex = 0;
 

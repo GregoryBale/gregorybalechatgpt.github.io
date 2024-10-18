@@ -192,6 +192,21 @@ body {
     transition: color 0.3s;
 }
 
+#infoforupdates {
+    	display: fix;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background-color: white;
+        border-radius: 5px;
+        text-align: center;
+    }
+}
+
+#infoforupdates:hover {
+    color: #d32f2f;
+}
+
 #clear-chat:hover {
     color: #d32f2f;
 }
@@ -233,6 +248,9 @@ code {
     }
 	    #clear-chat-mobile {
         display: block;
+        }
+        #infoforupdate-mobile {
+        display: block;
     }
     .chat-app {
         flex-direction: column;
@@ -264,7 +282,7 @@ code {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background-color: var(--tg-theme-button-color);
+    background-color: black;
     border: 2px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: center;
@@ -277,7 +295,7 @@ code {
 
 .mobile-menu-button:hover {
     transform: scale(1.05);
-    background-color: var(--tg-theme-button-color);
+    background-color: black;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
@@ -331,8 +349,7 @@ code {
     width: 85%;
     max-width: 360px;
     height: 100vh;
-    background-color: none;
-    backdrop-filter: blur(60px);
+    background-color: white;
     z-index: 999;
     padding: 24px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -415,7 +432,25 @@ code {
     transition: all 0.3s ease;
 }
 
+#infoforupdates-mobile {
+    width: 77%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--tg-theme-text-color), 0.1);
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-top: 5px;
+}
+
 #clear-chat-mobile:focus {
+    outline: none;
+    border-color: var(--tg-theme-button-color);
+    box-shadow: 0 0 0 2px rgba(var(--tg-theme-button-color), 0.2);
+}
+
+#infoforupdates-mobile:focus {
     outline: none;
     border-color: var(--tg-theme-button-color);
     box-shadow: 0 0 0 2px rgba(var(--tg-theme-button-color), 0.2);
@@ -642,10 +677,25 @@ code {
         transition: color 0.3s;
         margin-left: 10px;
     }
+    .sidebar-header #infoforupdates {
+        display: inline-block;
+        background: none;
+        border: none;
+        color: var(--tg-theme-hint-color);
+        cursor: pointer;
+        font-size: 14px;
+        transition: color 0.3s;
+        margin-left: 10px;
+    }
 
     .sidebar-header #clear-chat:hover {
         color: #d32f2f;
     }
+    
+    .sidebar-header #infoforupdates:hover {
+        color: #d32f2f;
+    }
+    
     select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -782,40 +832,9 @@ code {
     animation: fade 2s ease-in-out infinite;
 }
 
-@keyframes fade {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    50% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-}
-
 @keyframes typing {
     from { width: 0 }
     to { width: 100% }
-}
-
-.typing-animation {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    vertical-align: bottom;
-    border-right: 2px solid;
-    width: 0;
-    animation: typing 2s steps(50, end) forwards,
-               blink-caret .75s step-end infinite;
-}
-
-@keyframes blink-caret {
-    from, to { border-color: transparent }
-    50% { border-color: black; }
 }
 
 .static-text {
@@ -878,7 +897,6 @@ code {
     .download-button:hover {
         background-color: #45a049;
     }
-    
     
     .message-with-image img {
     max-width: 100%; /* Ограничиваем ширину изображения до 100% */

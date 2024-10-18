@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="add_custom_model.css">
     <link rel="shortcut icon" href="icon.png" />
-<link rel="icon" href="favicon-16x16.png" sizes="16x16" type="image/png">
-<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <!-- Yandex.RTB -->
     <script>window.yaContextCb = window.yaContextCb || []</script>
     <script src="https://yandex.ru/ads/system/context.js" async></script>
@@ -36,6 +37,7 @@
         </select>
     </div>
     <button id="clear-chat-mobile">Очистить чат</button>
+    <button id="infoforupdates-mobile">Список обновлений</button>
 </div>
         <!-- Боковая панель с выбором ИИ -->
         <aside class="sidebar">
@@ -43,7 +45,7 @@
                 <h1>Чат с ИИ (<span id="current-model">Выберите модель</span>)</h1>
                 <button id="clear-chat" title="Очистить чат" aria-label="Очистить чат">
                     Очистить чат <i class="fas fa-trash"></i>
-                </button>
+                </button>              
             </header>
             <div class="model-select">
                 <label for="ai-model-select" class="model-label">Выбор модели ИИ:</label>
@@ -56,8 +58,7 @@
                     <option value="gpt4-32k">GPT-4 32k</option>
                     <option value="gpt3">GPT-3</option>
                     <option value="gpt4">GPT-4</option>
-                    <option value="gpt4o">GPT-4o</option>
-                    <option value="gpt4omni">GPT-4 Omni</option>
+                    <option value="gpt4o">GPT-4o</option>  
                     <option value="phi3">Phi 3</option>
                     <option value="qwen2">Qwen 2</option>
                     <option value="gemma">Gemma AI</option>
@@ -65,6 +66,9 @@
                     <option value="openchat">OpenChat</option>
                     <option value="claude">Claude</option>
                 </select>
+                <button id="infoforupdates" title="Список обновлений" aria-label="Список обновлений">
+    Список обновлений  <i class="fas fa-sync"></i>
+</button>
             </div>
         </aside>
         <!-- Основная часть чата -->
@@ -73,13 +77,15 @@
                 <!-- Приветственное сообщение -->
                 <div class="message welcome-message ai-message">
     <div class="message-with-image">
-        <img src="welcome.png" alt="Приветственное изображение" style="height: 20%;">
+        <center>
+           <img src="welcome.png" alt="Приветственное изображение" style="height: auto;">
+           	</center>
         <p>Здравствуйте!<br>
         Добро пожаловать на наш проект, который абсолютно бесплатен и предлагает доступ ко всем моделям ИИ без затрат. <br><br>🖌️ • Здесь вы можете генерировать изображения с помощью команды: <br><code>/image (запрос)</code><br> <br>Например: <code>/image Котики</code> 
         <br><br>
         Кроме того, вы можете общаться с различными моделями ИИ совершенно бесплатно. Мы постоянно улучшаем сайт и добавляем новые функции. Реклама на сайте — единственный способ поддерживать проект и сохранять его бесплатным.
         <br><br>
-        Спасибо, что выбрали нас! <br>❤️ (версия сайта 1.01 бета) <br><br>
+        Спасибо, что выбрали нас! <br>❤️ (версия сайта 1.04 бета) <br><br>
         <b>Появились вопросы или предложения?</b><br>
         🤝 • <a href="https://t.me/gregorybale">Написать мне</a><br>
         😊 • <a href="https://t.me/gregorybaleportfolio">Мой ТГ канал</a>
@@ -146,8 +152,18 @@
     </div>
 </div>
     </div>
+    <div id="updates-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <span id="close-updates-modal" class="close" aria-label="Закрыть модальное окно">&times;</span>
+        <h2>Список обновлений</h2>
+        <br>
+        <ul id="updates-list"></ul>
+    </div>
+</div>
     <!-- Подключение JS файлов -->
     <script src="script.js"></script>
+    <script src="updates.js"></script>
+    <script src="animation.js"></script>
     <script src="add_custom_model.js"></script>   
 </body>
 </html>
