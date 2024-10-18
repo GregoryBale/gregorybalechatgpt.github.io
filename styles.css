@@ -157,13 +157,6 @@ body {
     }
 } 
 
-/* Стили для ПК */
-@media (min-width: 769px) {
-    .ai-message {
-        max-width: 60%; /* Максимальная ширина для ПК */
-    }
-}
-
 .ad-message {
     background-color: #ffd700;
     padding: 10px;
@@ -232,38 +225,7 @@ code {
     color: #a9b7c6;
 }
 
-.typing-indicator {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: var(--tg-theme-received-message-bg);
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
 
-.typing-indicator span {
-    height: 8px;
-    width: 8px;
-    background-color: var(--tg-theme-hint-color);
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-    animation: typing 1s infinite;
-}
-
-.typing-indicator span:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes typing {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0); }
-}
 
 @media (max-width: 768px) {
 	    .sidebar-button {
@@ -370,7 +332,7 @@ code {
     max-width: 360px;
     height: 100vh;
     background-color: none;
-    backdrop-filter: blur(40px);
+    backdrop-filter: blur(60px);
     z-index: 999;
     padding: 24px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -382,7 +344,7 @@ code {
 
 /* Элементы меню */
 .mobile-menu button, .mobile-menu a {
-    width: 80%; /* Ширина элементов чуть меньше, чтобы они выглядели центрированными */
+    width: 60%; /* Ширина элементов чуть меньше, чтобы они выглядели центрированными */
     padding: 12px 16px;
     background-color: var(--tg-theme-secondary-bg-color);
     color: var(--tg-theme-text-color);
@@ -489,7 +451,7 @@ code {
         text-align: center;
     }
 }
-}
+
 .chat-actions {
     display: flex;
     justify-content: space-between;
@@ -525,7 +487,7 @@ code {
 /* Стили для приветственного сообщения */
 .welcome-message {
     background-color: #ffffff; /* Легкий зеленый фон */
-    color: #0000000; /* Темно-зеленый текст */
+    color: #000000; /* Темно-зеленый текст */
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 20px; /* Отступ снизу */
@@ -551,7 +513,119 @@ code {
     display: none;
 }
 
+/* Стили для маленьких настольных мониторов */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .ai-message {
+        max-width: 60%;
+    }
+}
+
+/* Стили для средних настольных мониторов */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .ai-message {
+        max-width: 55%;
+    }
+}
+
+/* Стили для больших настольных мониторов */
+@media (min-width: 1281px) and (max-width: 1440px) {
+    .ai-message {
+        max-width: 50%;
+    }
+}
+
+/* Стили для очень больших настольных мониторов */
+@media (min-width: 1441px) and (max-width: 1920px) {
+    .ai-message {
+        max-width: 45%;
+    }
+}
+
+/* Стили для сверхбольших мониторов */
+@media (min-width: 1921px) and (max-width: 2560px) {
+    .ai-message {
+        max-width: 40%;
+    }
+}
+
+/* Стили для экстремально больших мониторов */
+@media (min-width: 2561px) {
+    .ai-message {
+        max-width: 35%;
+    }
+}
+
+/* Дополнительные стили для улучшения читаемости на больших экранах */
+@media (min-width: 1441px) {
+    .ai-message {
+        font-size: 18px;
+        line-height: 1.6;
+    }
+}
+
+@media (min-width: 1921px) {
+    .ai-message {
+        font-size: 20px;
+        line-height: 1.7;
+    }
+}
+
+@media (max-width: 768px) {
+    .message-with-image img {
+        max-width: 100%; /* Полная ширина на мобильных устройствах */
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .message-with-image img {
+        max-width: 60%; /* Соответствует максимальной ширине сообщения на маленьких ПК */
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .message-with-image img {
+        max-width: 55%;
+    }
+}
+
+@media (min-width: 1281px) and (max-width: 1440px) {
+    .message-with-image img {
+        max-width: 50%;
+    }
+}
+
+@media (min-width: 1441px) and (max-width: 1920px) {
+    .message-with-image img {
+        max-width: 45%;
+    }
+}
+
+@media (min-width: 1921px) {
+    .message-with-image img {
+        max-width: 40%;
+    }
+}
+
 @media (min-width: 769px) {
+    .sidebar .model-select select {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(var(--tg-theme-text-color), 0.1);
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-text-color);
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar .model-select select:focus {
+        outline: none;
+        border-color: var(--tg-theme-button-color);
+        box-shadow: 0 0 0 2px rgba(var(--tg-theme-button-color), 0.2);
+    }
+    .ai-message {
+        max-width: 40%; /* Максимальная ширина для ПК */
+    }
 	    #new-chat {
         display: none;
     }
@@ -571,6 +645,15 @@ code {
 
     .sidebar-header #clear-chat:hover {
         color: #d32f2f;
+    }
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+        background-repeat: no-repeat;
+        background-position-x: 98%;
+        background-position-y: 50%;
     }
 }
 
@@ -713,6 +796,32 @@ code {
         transform: translateY(-10px);
     }
 }
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+.typing-animation {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    border-right: 2px solid;
+    width: 0;
+    animation: typing 2s steps(50, end) forwards,
+               blink-caret .75s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: black; }
+}
+
+.static-text {
+    display: inline-block;
+}
+
 /* Стили для сообщения с блокировкой рекламы */
 .adblock-message {
     background-color: #ffcccc;
@@ -780,7 +889,8 @@ code {
 
 @media (min-width: 768px) { /* Для экранов шире 768px */
     .message-with-image img {
-        max-width: 50%; /* Ограничиваем ширину изображения до 50% на больших экранах */
-        height: 30%; /* Сохраняем автоматическую высоту */
+        max-width: 40%; /* Ограничиваем ширину изображения до 50% на больших экранах */
+        height: 10%; /* Сохраняем автоматическую высоту */
     }
 }
+

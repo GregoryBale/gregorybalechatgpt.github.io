@@ -257,7 +257,7 @@ async function sendMessage() {
         } catch (error) {
             console.error('Error:', error);
             if (message.startsWith('/image ')) {
-                addMessage("Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
+                addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
             } else {
                 addMessage('🔄 Произошла ошибка при получении ответа. Пробую другую модель.', false);
                 await retryWithAnotherModel(message);
@@ -272,7 +272,7 @@ async function sendMessage() {
 
 async function handleImageGeneration(message) {
     const prompt = message.slice(7).trim(); // Удаляем '/image ' из начала сообщения
-    addMessage(`Генерация изображения для запроса: "${prompt}"`, false);
+    addMessage(`🖌 Генерация изображения для запроса: "${prompt}"`, false);
 
     try {
         const translationResponse = await fetch(`https://paxsenix.serv00.net/v1/gpt3.5.php?text=${encodeURIComponent(`переведи текст на английский ${prompt}`)}`);
@@ -284,20 +284,20 @@ async function handleImageGeneration(message) {
             
             if (imageResult.ok) {
                 const imageMessage = `
-                    <img src="${imageResult.url}" alt="Сгенерированное изображение" style="max-width: 100%; height: auto;">
-                    <p>Изображение сгенерировано с помощью модели: ${imageResult.model}</p>
+                    <img src="${imageResult.url}" alt="🖌 Сгенерированное изображение" style="max-width: 100%; height: auto;">
+                    <p class="model-info" style="font-size: 0.8em; color: #666; margin-top: 5px;">Изображение сгенерировано с помощью модели: ${imageResult.model}</p>
                     <a href="${imageResult.url}" download="generated_image.png" class="download-button">Скачать изображение</a>
                 `;
                 addMessage(imageMessage, false);
             } else {
-                addMessage("Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
+                addMessage("😔 Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
             }
         } else {
-            addMessage("Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
+            addMessage("😔 Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
         }
     } catch (error) {
         console.error('Error:', error);
-        addMessage("Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
+        addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
     }
 }
 
@@ -494,10 +494,15 @@ function showTypingIndicator() {
     typingIndicator.classList.add('typing-indicator');
 
     const phrases = [
-        "ИИ думает...",
-        "Обрабатываем запрос...",
-        "Подождите немного...",
-        "Секунду..."
+        "▓енерация",
+        "Г▒нерация",
+        "Ге░ерация",
+        "Ген█рация",
+        "Генер▀ция",
+        "Генера▄ия",
+        "Генерац▌я",
+        "Генерация",
+        "Генераци■"
     ];
 
     let phraseIndex = 0;
@@ -514,7 +519,7 @@ function showTypingIndicator() {
     const intervalId = setInterval(() => {
         phraseIndex = (phraseIndex + 1) % phrases.length;
         phraseSpan.textContent = phrases[phraseIndex];
-    }, 1000);
+    }, 80);
 }
 
 function hideTypingIndicator() {
