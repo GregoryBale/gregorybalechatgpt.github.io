@@ -20,6 +20,11 @@
     <script>window.yaContextCb = window.yaContextCb || []</script>
     <script src="https://yandex.ru/ads/system/context.js" async></script>
 </head>
+<header class="top-menu">
+        <h1>AI Чат by @gregorybale      |      <button id="clear-chat" title="Очистить чат" aria-label="Очистить чат">
+                    Очистить чат <i class="fas fa-trash"></i>
+                </button></h1>
+    </header>
 <body>
     <div class="chat-app">
     	<!-- Добавьте эту структуру сразу после открывающего тега chat-app -->
@@ -45,10 +50,7 @@
         <!-- Боковая панель с выбором ИИ -->
         <aside class="sidebar">
             <header class="sidebar-header">
-                <h1>Чат с ИИ (<span id="current-model">Выберите модель</span>)</h1>
-                <button id="clear-chat" title="Очистить чат" aria-label="Очистить чат">
-                    Очистить чат <i class="fas fa-trash"></i>
-                </button>              
+                <h1>Чат с ИИ (<span id="current-model">Выберите модель</span>)</h1>                  
             </header>
             <div class="model-select">
                 <label for="ai-model-select" class="model-label">Выбор модели ИИ:</label>
