@@ -1057,3 +1057,89 @@ code {
     object-fit: contain; /* Сохраняет пропорции изображения */
   }
 }
+
+.message-container {
+    position: relative;
+    width: 100%;
+}
+
+.message-buttons {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: none;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    transition: opacity 0.3s ease;
+}
+
+.message-buttons.visible {
+    display: flex;
+    gap: 8px;
+}
+
+.message-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.message-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.notification-success {
+    background: #4CAF50;
+}
+
+.notification-error {
+    background: #f44336;
+}
+
+.regenerating, .translating {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .message-buttons {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        top: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+    }
+    
+    .message-btn {
+        padding: 12px;
+    }
+}

@@ -192,26 +192,29 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
                 <div id="${adId}"></div>
             </div>
         `;
-        if (window.yaContextCb && typeof window.yaContextCb.push === 'function') {
-            window.yaContextCb.push(() => {
-                if (Ya && Ya.Context && Ya.Context.AdvManager && typeof Ya.Context.AdvManager.render === 'function') {
-                    Ya.Context.AdvManager.render({
-                        "blockId": "R-A-12365980-1",
-                        "renderTo": adId
-                    });
-                } else {
-                    console.error('Yandex.Direct API не доступен');
-                }
-            });
-        } else {
-            console.error('window.yaContextCb не найден или не является массивом');
-        }
+        handleAdRendering(adId);
     } else if (isUser) {
         messageDiv.textContent = content;
     } else {
-        // Форматирование сообщений от ИИ
+        // Создаем контейнер для контента и кнопок
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+
+        // Добавляем контент сообщения
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
         const formattedContent = typeof formatAIMessage === 'function' ? formatAIMessage(content) : content;
-        messageDiv.innerHTML = formattedContent;
+        contentDiv.innerHTML = formattedContent;
+        messageContainer.appendChild(contentDiv);
+
+        // Создаем панель с кнопками
+        const buttonsPanel = createMessageButtons(content, messageDiv);
+        messageContainer.appendChild(buttonsPanel);
+        
+        messageDiv.appendChild(messageContainer);
+
+        // Добавляем обработчики событий для desktop и mobile
+        setupMessageInteractions(messageDiv, buttonsPanel);
     }
 
     if (!isUser && !isAd && aiInfo) {
@@ -223,16 +226,215 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
 
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    handleMessageStorage(currentChatId, content, isUser, aiInfo, isAd);
+    handleMessageCount(isAd);
+}
 
-    if (currentChatId && !isAd) {
-        if (!chats[currentChatId]) {
+function createMessageButtons(content, messageDiv) {
+    const buttonsPanel = document.createElement('div');
+    buttonsPanel.classList.add('message-buttons');
+    buttonsPanel.innerHTML = `
+        <button class="message-btn copy-btn" title="Копировать">
+            <i class="fas fa-copy"></i>
+        </button>
+        <button class="message-btn regenerate-btn" title="Регенерировать">
+            <i class="fas fa-redo"></i>
+        </button>
+        <button class="message-btn share-btn" title="Поделиться">
+            <i class="fas fa-share"></i>
+        </button>
+        <button class="message-btn translate-btn" title="Перевести">
+            <i class="fas fa-language"></i>
+        </button>
+    `;
+
+    // Добавляем обработчики для кнопок
+    const copyBtn = buttonsPanel.querySelector('.copy-btn');
+    const regenerateBtn = buttonsPanel.querySelector('.regenerate-btn');
+    const shareBtn = buttonsPanel.querySelector('.share-btn');
+    const translateBtn = buttonsPanel.querySelector('.translate-btn');
+
+    copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        copyMessageContent(content);
+    });
+
+    regenerateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regenerateMessage(messageDiv);
+    });
+
+    shareBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        shareMessage(content);
+    });
+
+    translateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        translateMessage(messageDiv, content);
+    });
+
+    return buttonsPanel;
+}
+
+function setupMessageInteractions(messageDiv, buttonsPanel) {
+    // Desktop hover
+    messageDiv.addEventListener('mouseenter', () => {
+        buttonsPanel.classList.add('visible');
+    });
+
+    messageDiv.addEventListener('mouseleave', () => {
+        buttonsPanel.classList.remove('visible');
+    });
+
+    // Mobile long press
+    let pressTimer;
+    let isLongPress = false;
+
+    messageDiv.addEventListener('touchstart', (e) => {
+        pressTimer = setTimeout(() => {
+            isLongPress = true;
+            buttonsPanel.classList.add('visible');
+            // Добавляем вибрацию для обратной связи
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }, 500);
+    });
+
+    messageDiv.addEventListener('touchend', () => {
+        clearTimeout(pressTimer);
+        if (isLongPress) {
+            setTimeout(() => {
+                buttonsPanel.classList.remove('visible');
+                isLongPress = false;
+            }, 3000); // Скрываем через 3 секунды после отпускания
+        }
+    });
+
+    messageDiv.addEventListener('touchmove', () => {
+        clearTimeout(pressTimer);
+    });
+}
+
+async function copyMessageContent(content) {
+    try {
+        await navigator.clipboard.writeText(content);
+        showNotification('Текст скопирован в буфер обмена');
+    } catch (err) {
+        console.error('Failed to copy text:', err);
+        showNotification('Не удалось скопировать текст', 'error');
+    }
+}
+
+async function regenerateMessage(messageDiv) {
+    const originalMessage = messageDiv.querySelector('.message-content').textContent;
+    messageDiv.classList.add('regenerating');
+    
+    try {
+        const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
+        const apiUrl = aiModels[model].url + encodeURIComponent(originalMessage);
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        const newResponse = await processAPIResponse(data, model);
+        
+        messageDiv.querySelector('.message-content').innerHTML = 
+            typeof formatAIMessage === 'function' ? formatAIMessage(newResponse) : newResponse;
+        
+        showNotification('Сообщение регенерировано');
+    } catch (error) {
+        console.error('Ошибка при регенерации:', error);
+        showNotification('Не удалось регенерировать сообщение', 'error');
+    } finally {
+        messageDiv.classList.remove('regenerating');
+    }
+}
+
+async function shareMessage(content) {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                text: content
+            });
+        } catch (err) {
+            console.error('Error sharing:', err);
+            showNotification('Не удалось поделиться сообщением', 'error');
+        }
+    } else {
+        copyMessageContent(content);
+        showNotification('Текст скопирован для отправки');
+    }
+}
+
+async function translateMessage(messageDiv, content) {
+    messageDiv.classList.add('translating');
+    
+    try {
+        const response = await fetch(`https://paxsenix.serv00.net/v1/gpt3.5.php?text=${encodeURIComponent('Переведи текст на английский: ' + content)}`);
+        const data = await response.json();
+        
+        if (data.ok) {
+            const translation = data.response;
+            messageDiv.querySelector('.message-content').innerHTML = 
+                typeof formatAIMessage === 'function' ? formatAIMessage(translation) : translation;
+            showNotification('Текст переведен');
+        } else {
+            throw new Error('Translation failed');
+        }
+    } catch (error) {
+        console.error('Error translating:', error);
+        showNotification('Не удалось перевести текст', 'error');
+    } finally {
+        messageDiv.classList.remove('translating');
+    }
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.classList.add('notification', `notification-${type}`);
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 2000);
+    }, 100);
+}
+
+function handleAdRendering(adId) {
+    if (window.yaContextCb && typeof window.yaContextCb.push === 'function') {
+        window.yaContextCb.push(() => {
+            if (Ya && Ya.Context && Ya.Context.AdvManager && typeof Ya.Context.AdvManager.render === 'function') {
+                Ya.Context.AdvManager.render({
+                    "blockId": "R-A-12365980-1",
+                    "renderTo": adId
+                });
+            } else {
+                console.error('Yandex.Direct API не доступен');
+            }
+        });
+    } else {
+        console.error('window.yaContextCb не найден или не является массивом');
+    }
+}
+
+function handleMessageStorage(chatId, content, isUser, aiInfo, isAd) {
+    if (chatId && !isAd) {
+        if (!chats[chatId]) {
             console.error('Текущий чат не найден');
             return;
         }
-        if (!Array.isArray(chats[currentChatId].messages)) {
-            chats[currentChatId].messages = [];
+        if (!Array.isArray(chats[chatId].messages)) {
+            chats[chatId].messages = [];
         }
-        chats[currentChatId].messages.push({
+        chats[chatId].messages.push({
             content,
             isUser,
             aiInfo,
@@ -244,7 +446,9 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
             console.error('Ошибка при сохранении чата в localStorage:', error);
         }
     }
+}
 
+function handleMessageCount(isAd) {
     if (typeof messageCount !== 'undefined') {
         messageCount++;
         if (messageCount % 5 === 0 && !isAd) {
