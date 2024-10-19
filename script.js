@@ -16,13 +16,13 @@ function safeAddEventListener(element, event, handler) {
     }
 }
 
-const chatMessages = document.getElementById('chat-messages');
-const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-message');
-const clearButton = document.getElementById('clear-chat');
-const aiModelSelect = document.getElementById('ai-model-select');
-const currentModelSpan = document.getElementById('current-model');
-const chatHistory = document.getElementById('chat-history');
+const chatMessages = safeGetElement('chat-messages');
+const userInput = safeGetElement('user-input');
+const sendButton = safeGetElement('send-message');
+const clearButton = safeGetElement('clear-chat');
+const aiModelSelect = safeGetElement('ai-model-select');
+const currentModelSpan = safeGetElement('current-model');
+const chatHistory = safeGetElement('chat-history');
 
 function safeAddEventListener(element, event, handler) {
     if (element) {
@@ -71,6 +71,8 @@ let selectedModel = 'random';
 let currentChatId = null;
 let chats = JSON.parse(localStorage.getItem('chats')) || {};
 let messageCount = 0;
+
+const aiSessions = {};
 
 const aiModels = {
     'llama': {
@@ -130,6 +132,31 @@ const aiModels = {
         responseType: 'message'
     }
 };
+
+function initAISession(model) {
+    if (!aiSessions[model]) {
+        aiSessions[model] = {
+            messages: [],
+            context: ''
+        };
+    }
+}
+
+function updateAIContext(model, message, response) {
+    if (!aiSessions[model]) {
+        initAISession(model);
+    }
+    aiSessions[model].messages.push({ role: 'user', content: message });
+    aiSessions[model].messages.push({ role: 'assistant', content: response });
+    
+    // Ограничиваем количество сохраненных сообщений
+    if (aiSessions[model].messages.length > 10) {
+        aiSessions[model].messages = aiSessions[model].messages.slice(-10);
+    }
+    
+    // Обновляем контекст
+    aiSessions[model].context = aiSessions[model].messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+}
 
 const imageGenerationApis = [
     { url: 'https://api.paxsenix.biz.id/ai-image/fluxSchnell?text=', name: 'FluxSchnell' },
@@ -227,8 +254,38 @@ function addMessage(content, isUser = false, aiInfo = '', isAd = false) {
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    handleMessageStorage(currentChatId, content, isUser, aiInfo, isAd);
+    // Сохраняем сообщение в текущий чат
+    if (currentChatId && !isAd) {
+        if (!chats[currentChatId]) {
+            chats[currentChatId] = { messages: [] };
+        }
+        chats[currentChatId].messages.push({
+            content,
+            isUser,
+            aiInfo,
+            timestamp: new Date().toISOString()
+        });
+        saveChatToLocalStorage();
+    }
+    
     handleMessageCount(isAd);
+}
+
+// Обновленная функция handleMessageCount
+function handleMessageCount(isAd) {
+    if (typeof messageCount !== 'undefined') {
+        messageCount++;
+        if (messageCount % 5 === 0 && !isAd) {
+            addMessage('', false, '', true);
+        }
+    } else {
+        console.error('messageCount не определен');
+    }
+}
+
+// Функция для сохранения состояния чата в localStorage
+function saveChatToLocalStorage() {
+    localStorage.setItem('chats', JSON.stringify(chats));
 }
 
 function createMessageButtons(content, messageDiv) {
@@ -476,38 +533,334 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Компонент для работы с кодом в сообщениях
+class CodeBlockManager {
+    constructor() {
+        // Инициализация Map для хранения блоков кода
+        this.codeBlocks = new Map();
+        this.currentId = 0;
+    }
+
+    // Метод инициализации обработчиков событий
+    initializeEventListeners(container) {
+        // Находим все кнопки копирования и редактирования
+        const copyButtons = container.querySelectorAll('.copy-code-btn');
+        const editButtons = container.querySelectorAll('.edit-code-btn');
+
+        // Добавляем обработчики событий для каждой кнопки
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const blockId = e.target.closest('.code-block-container').id;
+                this.copyCode(blockId);
+            });
+        });
+
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const blockId = e.target.closest('.code-block-container').id;
+                this.editCode(blockId);
+            });
+        });
+    }
+
+    // Создание UI блока кода
+    createCodeBlockUI(code, language = '') {
+        const id = `code-block-${this.currentId++}`;
+        this.codeBlocks.set(id, code);
+
+        const container = document.createElement('div');
+        container.className = 'code-block-container';
+        container.id = id;
+
+        // Создание заголовка
+        const header = document.createElement('div');
+        header.className = 'code-block-header';
+
+        // Добавление информации о языке
+        const langSpan = document.createElement('span');
+        langSpan.className = 'code-language';
+        langSpan.textContent = language || 'text';
+        header.appendChild(langSpan);
+
+        // Создание кнопок
+        const actions = document.createElement('div');
+        actions.className = 'code-block-actions';
+
+        // Кнопка копирования
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-code-btn';
+        copyBtn.innerHTML = '';
+        
+        // Кнопка редактирования
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-code-btn';
+        editBtn.innerHTML = '';
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(editBtn);
+        header.appendChild(actions);
+
+        // Создание блока с кодом
+        const pre = document.createElement('pre');
+        pre.className = 'code-block-pre';
+        const codeElement = document.createElement('code');
+        codeElement.textContent = code;
+        pre.appendChild(codeElement);
+
+        container.appendChild(header);
+        container.appendChild(pre);
+
+        // Инициализация обработчиков событий
+        setTimeout(() => this.initializeEventListeners(container), 0);
+
+        return container;
+    }
+
+    // Копирование кода
+    async copyCode(id) {
+        try {
+            const code = this.codeBlocks.get(id);
+            await navigator.clipboard.writeText(code);
+            this.showNotification('Код скопирован!', 'success');
+        } catch (err) {
+            console.error('Ошибка копирования:', err);
+            this.showNotification('Ошибка при копировании', 'error');
+        }
+    }
+
+    // Редактирование кода
+    editCode(id) {
+        const container = document.getElementById(id);
+        if (!container) return;
+
+        const code = this.codeBlocks.get(id);
+        const pre = container.querySelector('.code-block-pre');
+        
+        // Создание редактора
+        const editor = document.createElement('div');
+        editor.className = 'code-editor';
+        
+        // Создание текстового поля
+        const textarea = document.createElement('textarea');
+        textarea.className = 'code-textarea';
+        textarea.value = code;
+        
+        // Создание кнопок действий
+        const actions = document.createElement('div');
+        actions.className = 'editor-actions';
+        
+        // Кнопка сохранения
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'save-code-btn';
+        saveBtn.textContent = 'Сохранить';
+        saveBtn.addEventListener('click', () => {
+            this.saveCode(id, textarea.value, pre, editor);
+        });
+        
+        // Кнопка отмены
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'cancel-edit-btn';
+        cancelBtn.textContent = 'Отмена';
+        cancelBtn.addEventListener('click', () => {
+            this.cancelEdit(pre, editor);
+        });
+        
+        actions.appendChild(cancelBtn);
+        actions.appendChild(saveBtn);
+        editor.appendChild(textarea);
+        editor.appendChild(actions);
+        
+        pre.style.display = 'none';
+        container.appendChild(editor);
+        
+        // Фокус на текстовое поле
+        textarea.focus();
+    }
+
+    // Сохранение изменений кода
+    saveCode(id, newCode, pre, editor) {
+        try {
+            this.codeBlocks.set(id, newCode);
+            const codeElement = pre.querySelector('code') || pre;
+            codeElement.textContent = newCode;
+            this.cancelEdit(pre, editor);
+            this.showNotification('Код сохранен!', 'success');
+        } catch (err) {
+            console.error('Ошибка сохранения:', err);
+            this.showNotification('Ошибка при сохранении', 'error');
+        }
+    }
+
+    // Отмена редактирования
+    cancelEdit(pre, editor) {
+        pre.style.display = 'block';
+        editor.remove();
+    }
+
+    // Показ уведомлений
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `code-notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        // Показ уведомления
+        requestAnimationFrame(() => {
+            notification.classList.add('show');
+        });
+        
+        // Скрытие и удаление уведомления
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+}
+
 function formatAIMessage(content) {
-    // Форматирование жирного текста
-    content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const codeBlockManager = new CodeBlockManager();
     
-    // Форматирование курсива
-    content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // Форматирование подчеркнутого текста
-    content = content.replace(/__(.*?)__/g, '<u>$1</u>');
-    
-    // Форматирование зачеркнутого текста
-    content = content.replace(/~~(.*?)~~/g, '<del>$1</del>');
-    
-    // Форматирование ссылок
-    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-    
-    // Форматирование цитат
-    content = content.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
-    
-    // Форматирование кода
-    content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
-    // Форматирование блоков кода
+    // Обработка блоков кода
     content = content.replace(/```(\w+)?\n([\s\S]+?)\n```/g, (match, language, code) => {
-        return `<pre><code class="language-${language || ''}">${code.trim()}</code></pre>`;
+        const codeBlock = codeBlockManager.createCodeBlockUI(code.trim(), language);
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(codeBlock);
+        return tempDiv.innerHTML;
     });
-    
-    // Преобразование переносов строк в HTML
-    content = content.replace(/\n/g, '<br>');
-    
+
+    // Остальное форматирование
+    content = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/__(.*?)__/g, '<u>$1</u>')
+        .replace(/~~(.*?)~~/g, '<del>$1</del>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+        .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+        .replace(/\n/g, '<br>');
+
     return content;
 }
+
+const codeStyles = document.createElement('style');
+codeStyles.textContent = `
+    .code-block-container {
+        margin: 1em 0;
+        background: #f8f9fa;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+
+    .code-block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5em 1em;
+        background: #e9ecef;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .code-language {
+        font-family: monospace;
+        color: #495057;
+        font-size: 0.9em;
+    }
+
+    .code-block-actions button {
+        background: none;
+        border: none;
+        padding: 0.25em 0.5em;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s;
+    }
+
+    .code-block-actions button:hover {
+        color: #212529;
+    }
+
+    .code-block-pre {
+        margin: 0;
+        padding: 1em;
+        overflow-x: auto;
+    }
+
+    .code-editor {
+        padding: 1em;
+    }
+
+    .code-textarea {
+        width: 100%;
+        min-height: 100px;
+        font-family: monospace;
+        padding: 0.5em;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        resize: vertical;
+    }
+
+    .editor-actions {
+        margin-top: 1em;
+        text-align: right;
+    }
+
+    .editor-actions button {
+        padding: 0.5em 1em;
+        margin-left: 0.5em;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .save-code-btn {
+        background: #28a745;
+        color: white;
+    }
+
+    .cancel-edit-btn {
+        background: #6c757d;
+        color: white;
+    }
+
+    .code-notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 1000;
+    }
+
+    .code-notification.success {
+        background: #28a745;
+    }
+
+    .code-notification.error {
+        background: #dc3545;
+    }
+
+    .code-notification.warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .code-notification.show {
+        opacity: 1;
+    }
+
+    .inline-code {
+        background: #f8f9fa;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+`;
+
+document.head.appendChild(codeStyles);
 
 async function processAPIResponse(data, model) {
     if (!data.ok) {
@@ -540,13 +893,15 @@ async function sendMessage() {
                 await handleImageGeneration(message);
             } else {
                 const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
-                let responseMessage;
+                initAISession(model);
                 
+                let responseMessage;
                 const customModels = JSON.parse(localStorage.getItem('customModels')) || {};
                 if (customModels[model]) {
-                    responseMessage = await customAiModels.getResponse(model, message);
+                    responseMessage = await customAiModels.getResponse(model, message, aiSessions[model].context);
                 } else {
-                    const apiUrl = aiModels[model].url + encodeURIComponent(message.replace(/ /g, '+'));
+                    const contextMessage = `${aiSessions[model].context}\nUser: ${message}\nAssistant:`;
+                    const apiUrl = aiModels[model].url + encodeURIComponent(contextMessage.replace(/ /g, '+'));
                     const response = await fetch(apiUrl);
                     if (!response.ok) {
                         throw new Error('API request failed');
@@ -555,6 +910,7 @@ async function sendMessage() {
                     responseMessage = await processAPIResponse(data, model);
                 }
                 
+                updateAIContext(model, message, responseMessage);
                 addMessage(responseMessage, false, `🤖 Ответ получен от: ${model}`);
             }
         } catch (error) {
@@ -572,6 +928,7 @@ async function sendMessage() {
         updateChatHistory();
     }
 }
+
 
 async function handleImageGeneration(message) {
     const prompt = message.slice(7).trim(); // Удаляем '/image ' из начала сообщения
@@ -606,7 +963,10 @@ async function handleImageGeneration(message) {
 
 async function retryWithAnotherModel(message) {
     const newModel = getRandomModel();
-    const newApiUrl = aiModels[newModel].url + encodeURIComponent(message.replace(/ /g, '+'));
+    initAISession(newModel);
+    
+    const contextMessage = `${aiSessions[newModel].context}\nUser: ${message}\nAssistant:`;
+    const newApiUrl = aiModels[newModel].url + encodeURIComponent(contextMessage.replace(/ /g, '+'));
     
     try {
         const newResponse = await fetch(newApiUrl);
@@ -615,12 +975,14 @@ async function retryWithAnotherModel(message) {
         }
         const newData = await newResponse.json();
         const responseMessage = await processAPIResponse(newData, newModel);
+        updateAIContext(newModel, message, responseMessage);
         addMessage(responseMessage, false, `🤖 Ответ получен от: ${newModel} (после ошибки)`);
     } catch (newError) {
         console.error('Error with new model:', newError);
         addMessage('😔 К сожалению, не удалось получить ответ. Пожалуйста, попробуйте другой модель.', false);
     }
 }
+
 
 function createNewChat() {
     const chatId = Date.now().toString();
@@ -633,10 +995,30 @@ function createNewChat() {
     saveChatToLocalStorage();
     updateChatHistory();
     loadChat(chatId);
+    
+    // Сбрасываем контекст для всех моделей при создании нового чата
+    Object.keys(aiSessions).forEach(model => {
+        aiSessions[model] = { messages: [], context: '' };
+    });
 }
 
 function saveChatToLocalStorage() {
     localStorage.setItem('chats', JSON.stringify(chats));
+}
+
+function loadChatFromLocalStorage() {
+    const savedChats = localStorage.getItem('chats');
+    if (savedChats) {
+        chats = JSON.parse(savedChats);
+        if (Object.keys(chats).length > 0) {
+            currentChatId = Object.keys(chats)[0];
+            loadChat(currentChatId);
+        } else {
+            createNewChat();
+        }
+    } else {
+        createNewChat();
+    }
 }
 
 function updateChatHistory() {
@@ -661,6 +1043,15 @@ function loadChat(chatId) {
         addMessage(msg.content, msg.isUser, msg.aiInfo, msg.isAd);
     });
     updateChatHistory();
+    
+    // Восстанавливаем контекст для текущей модели
+    const model = selectedModel === 'random' ? getRandomModel() : selectedModel;
+    initAISession(model);
+    aiSessions[model].messages = chats[chatId].messages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.content
+    }));
+    aiSessions[model].context = aiSessions[model].messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
 }
 
 function ensureCurrentChat() {
@@ -686,12 +1077,22 @@ clearButton.addEventListener('click', () => {
         chats[currentChatId].messages = [];
         messageCount = 0;
         saveChatToLocalStorage();
+        
+        // Очищаем контекст для всех моделей
+        Object.keys(aiSessions).forEach(model => {
+            aiSessions[model] = { messages: [], context: '' };
+        });
     }
 });
 
 aiModelSelect.addEventListener('change', (e) => {
     selectedModel = e.target.value;
     currentModelSpan.textContent = e.target.options[e.target.selectedIndex].text;
+    
+    // Инициализируем сессию для выбранной модели, если она еще не существует
+    if (selectedModel !== 'random') {
+        initAISession(selectedModel);
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
