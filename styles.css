@@ -175,12 +175,13 @@ body {
 
 #user-input:focus {
     outline: none;
-    border-color: var(--tg-theme-link-color);
+    border-color: black;
 }
 
 /* Анимация при наведении */
 #send-message:hover {
-    background-color: #4a7ab0; /* Более насыщенный цвет при наведении */
+    background-color: #ffffff; /* Более насыщенный цвет при наведении */
+    color: black:
 }
 
 #clear-chat {
@@ -202,7 +203,6 @@ body {
         text-align: center;
         border: none;
     }
-}
 
 #helpbutton {
     	display: fix;
@@ -763,7 +763,6 @@ code {
         background-position-y: 50%;
     }
 }
-
 .sidebar-button {
     background: none;
     border: none;
@@ -773,11 +772,9 @@ code {
     transition: color 0.3s;
     margin-left: 10px;
 }
-
 .sidebar-button:hover {
     color: var(--tg-theme-link-color);
 }
-
 /* Контейнер для ввода сообщения */
 .chat-input-container {
     padding: 15px;
@@ -788,7 +785,6 @@ code {
     gap: 10px; /* Расстояние между кнопками и полем ввода */
     flex-wrap: nowrap; /* Элементы остаются на одной строке */
 }
-
 /* Поле ввода */
 #user-input {
     flex-grow: 1; /* Поле ввода растягивается и занимает оставшееся пространство */
@@ -802,12 +798,11 @@ code {
     resize: none;
     overflow-y: auto;
 }
-
 /* Общие стили для всех кнопок */
 #send-message, #voice-input-button, #add-model-button {
     width: 40px;
     height: 40px;
-    background-color: #EFEFEF;
+    background-color: #000000;
     border: 1px solid #EFEFEF;
     border-radius: 50%;
     display: flex;
@@ -818,44 +813,37 @@ code {
     flex-shrink: 0;
     padding: 0;
 }
-
 #send-message:hover, #voice-input-button:hover, #add-model-button:hover {
     background-color: #E0E0E0;
     border-color: #E0E0E0;
 }
-
 #send-message svg, #voice-input-button svg, #add-model-button svg {
     width: 20px;
     height: 20px;
     fill: #000000;
 }
-
 /* Стили для кнопки отправки сообщения */
 #send-message svg {
-    fill: black; /* Синий цвет для иконки отправки */
+    fill: rgb(255, 255, 255); /* Синий цвет для иконки отправки */
 }
-
 /* Стили для кнопки голосового ввода */
 #voice-input-button svg {
     fill: black; /* Красный цвет для иконки микрофона */
 }
-
 /* Стили для кнопки добавления модели (если она есть) */
 #add-model-button svg {
     fill: black; /* Зеленый цвет для иконки добавления */
 }
-
 /* Эффект при наведении на кнопки */
 #send-message:hover, #voice-input-button:hover, #add-model-button:hover {
-    background-color: rgba(74, 122, 176, 0.2); /* Полупрозрачный фон при наведении для выделения */
-    border-color: #4a7ab0; /* Изменение цвета рамки при наведении */
+    background-color: rgba(0, 0, 0, 0.2); /* Полупрозрачный фон при наведении для выделения */
+    fill: rgb(0, 0, 0); /* Синий цвет для иконки отправки */
+    border-color: #000000; /* Изменение цвета рамки при наведении */
 }
-
 /* Минимальная ширина для контейнера, чтобы кнопки и поле ввода корректно располагались */
 .chat-input-container {
     min-width: 300px; /* Минимальная ширина контейнера, чтобы элементы не накладывались друг на друга */
 }
-
 #user-input {
     flex-grow: 1;
     border: 1px solid #e0e0e0;
@@ -869,7 +857,6 @@ code {
     max-height: 120px;
     overflow-y: auto;
 }
-
 .typing-indicator {
     display: flex;
     align-items: center;
@@ -944,15 +931,16 @@ code {
     .download-button {
         display: inline-block;
         padding: 5px 10px;
-        background-color: #EFEFEF;
-        color: black;
+        background-color: #000000;
+        color: white;
         text-decoration: none;
         border-radius: 5px;
         margin-top: 10px;
     }
 
     .download-button:hover {
-        background-color: #45a049;
+        background-color: #EFEFEF;
+        color: black;
     }
     
     .message-with-image img {
@@ -984,12 +972,6 @@ code {
     margin: 0 auto;  /* Центрируем блок */
     background-color: white; /* Фон как у меню */
     padding-top: 80px; 
-    padding-left: 20;
-    padding-right: 20px;
-    padding-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center; 
     }
 .top-menu h1 {
     font-size: 20px;
@@ -1037,7 +1019,7 @@ code {
 .ai-message {
     background-color: var(--tg-theme-received-message-bg);
     border-bottom-left-radius: 0;
-    max-width: 60%; /* Ограничение ширины блока */
+    max-width: 40%; /* Ограничение ширины блока */
     width: fit-content; /* Ширина блока соответствует содержимому */
     overflow-wrap: break-word; /* Перенос длинных слов */
     padding: 10px; /* Добавляем отступы для лучшего внешнего вида */
@@ -1058,27 +1040,20 @@ code {
     background-color: rgba(0, 0, 0, 0.1);
 }
 .chat-app {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    border: 1px solid #e0e0e0;
     border-radius: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
 }
 .sidebar {
-    width: 300px;
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-right: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
     border-radius: 15px 0 0 15px;
 }
 
 .sidebar-header {
-    padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     border-radius: 15px 0 0 15px;
 }
+.photopc {
+    width: 100%; /* Изображение будет занимать всю доступную ширину контейнера */
+    max-height: 30vh; /* Высота изображения ограничена 30% от высоты окна */
+    object-fit: contain; /* Сохраняет пропорции изображения */
+  }
 }
