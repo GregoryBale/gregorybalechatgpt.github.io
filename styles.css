@@ -637,13 +637,12 @@ code {
 }
 /* Стили для приветственного сообщения */
 .welcome-message {
-    background-color: #ffffff; /* Легкий зеленый фон */
-    color: #000000; /* Темно-зеленый текст */
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px; /* Отступ снизу */
-    font-size: 16px;
-    font-weight: 500;
+    background-color: var(--tg-theme-received-message-bg);
+    border-bottom-left-radius: 0;
+    max-width: 60%; /* Ограничение ширины блока */
+    width: fit-content; /* Ширина блока соответствует содержимому */
+    overflow-wrap: break-word; /* Перенос длинных слов */
+    padding: 10px; /* Добавляем отступы для лучшего внешнего вида */
 }
 
 .welcome-message p {
@@ -1007,6 +1006,32 @@ code {
 .static-text {
     display: inline-block;
 }
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .notification.show {
+    opacity: 1;
+  }
+  
+  .notification.notification-success {
+    background-color: #4CAF50;
+  }
+  
+  .notification.notification-error {
+    background-color: #F44336;
+  }
 
 /* Стили для сообщения с блокировкой рекламы */
 .adblock-message {
@@ -1431,3 +1456,4 @@ code {
     gap: 10px;
     cursor: pointer;
   }
+  
