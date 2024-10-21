@@ -41,24 +41,25 @@
 </button>
 <div class="mobile-menu">
     <div class="mobile-menu-header">
-        <h1>Чат с ИИ (<span id="current-model-mobile">Выберите модель</span>)</h1>
+        <h1>Чат с ИИ (<span id="current-model-mobile">Выберите модель</span>)     <div class="model-select">
+            <select id="ai-model-select-mobile">
+                <!-- Те же опции, что и в основном селекте -->
+            </select>
+        </div></h1>
+        <br>
+        <div class="mobile-notification-button">
+            <button id="mobile-notifications-btn">
+                <i class="fas fa-bell"></i> Уведомления 
+            </button>
+            <span id="mobile-notification-dot" class="mobile-notification-dot"></span>
+        </div>
+        <button id="infoforupdates-mobile">
+            <i class="fas fa-list"></i> Список обновлений
+        </button>
+        <button id="clear-chat-mobile-red">
+            <i class="fas fa-trash-alt"></i> Очистить чат
+        </button>
     </div>
-    <div class="model-select">
-        <select id="ai-model-select-mobile">
-            <!-- Те же опции, что и в основном селекте -->
-        </select>
-    </div>
-<button id="infoforupdates-mobile">
-    <i class="fas fa-list"></i> Список обновлений
-</button>
-<button id="clear-chat-mobile-red">
-    <i class="fas fa-trash-alt"></i> Очистить чат
-</button>
-<button id="mobile-notifications-btn">
-    <i class="fas fa-bell"></i> Уведомления <span id="mobile-notification-dot"></span>
-</button>
-
-
 <!-- Modal for chat history in mobile -->
 <div id="mobile-chat-history-modal" class="modal">
     <div class="modal-content">
