@@ -23,12 +23,20 @@
 <header class="top-menu">
         <h1>AI Чат by @gregorybale      |      <button id="clear-chat" title="Очистить чат" aria-label="Очистить чат">
                     Очистить чат <i class="fas fa-trash"></i>
-                </button></h1>
+                </button>       <!-- Добавляем кнопку уведомлений -->
+                <button id="notifications-btn">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-count" class="notification-badge">1</span>
+                </button>
+            </h1>
     </header>
 <body>
     <div class="chat-app">
     	<!-- Добавьте эту структуру сразу после открывающего тега chat-app -->
-<button class="mobile-menu-button">
+        <button class="mobile-menu-button">
+            <span></span>
+            <span id="menu-notification-dot" class="notification-dot"></span> <!-- Красная точка -->
+        </button>
     <span></span>
 </button>
 <div class="mobile-menu">
@@ -46,6 +54,19 @@
 <button id="clear-chat-mobile-red">
     <i class="fas fa-trash-alt"></i> Очистить чат
 </button>
+<button id="mobile-notifications-btn">
+    <i class="fas fa-bell"></i> Уведомления <span id="mobile-notification-dot"></span>
+</button>
+
+
+<!-- Modal for chat history in mobile -->
+<div id="mobile-chat-history-modal" class="modal">
+    <div class="modal-content">
+        <h2>История чатов</h2>
+        <div class="mobile-chat-list" id="mobile-chat-list"></div>
+        <button id="mobile-new-chat">Новый чат</button>
+    </div>
+</div>
 </div>
         <!-- Боковая панель с выбором ИИ -->
         <aside class="sidebar">
@@ -113,7 +134,7 @@
                 </div>
             </footer>
         </main>
-        <!-- Модальное окно для добавления пользовательской модели -->
+ <!-- Модальное окно для добавления пользовательской модели -->
 <div id="add-model-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
         <span id="close-modal" class="close" aria-label="Закрыть модальное окно">&times;</span>
@@ -154,6 +175,18 @@
         </div>
     </div>
 </div>
+
+<!-- Модальное окно для уведомлений -->
+<div id="notifications-modal" class="modal">
+    <div class="modal-content">
+        <h2>Уведомления</h2>
+        <div id="notification-list">
+            <!-- Здесь будут отображаться уведомления -->
+        </div>
+        <button id="close-notifications">Закрыть</button>
+    </div>
+</div>
+
     </div>
     <div id="updates-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
@@ -166,6 +199,9 @@
     <!-- Подключение JS файлов -->
     <script src="script.js"></script>
     <script src="js/updates.js"></script>
+    <script src="js/test_by_test.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/chatshistory.js"></script>
     <script src="js/code.js"></script>
     <script src="js/animation.js"></script>
     <script src="js/add_custom_model.js"></script>   
