@@ -130,6 +130,14 @@ const aiModels = {
     'openchat': {
         url: 'https://api.paxsenix.biz.id/ai/openchat?text=',
         responseType: 'message'
+    },
+    'yo': {
+        url: 'https://api.paxsenix.biz.id/ai/yi?text=',
+        responseType: 'message'
+    },
+    'solarpro': {
+        url: 'https://api.paxsenix.biz.id/ai/solarpro?text=',
+        responseType: 'message'
     }
 };
 
