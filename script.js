@@ -131,7 +131,7 @@ const aiModels = {
         url: 'https://api.paxsenix.biz.id/ai/openchat?text=',
         responseType: 'message'
     },
-    'yo': {
+    'yi': {
         url: 'https://api.paxsenix.biz.id/ai/yi?text=',
         responseType: 'message'
     },
