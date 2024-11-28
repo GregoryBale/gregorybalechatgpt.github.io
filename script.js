@@ -138,6 +138,14 @@ const aiModels = {
     'solarpro': {
         url: 'https://api.paxsenix.biz.id/ai/solarpro?text=',
         responseType: 'message'
+    },
+    'nemotron': {
+        url: 'https://api.paxsenix.biz.id/ai/nemotron?text=',
+        responseType: 'message'
+    },
+    'llama3170b': {
+        url: 'https://api.paxsenix.biz.id/ai/llama3.1-70B?text=',
+        responseType: 'message'
     }
 };
 
