@@ -13,6 +13,15 @@ const translationApis = [
     'https://api.paxsenix.biz.id/ai/llama3.1-70B?text='
 ];
 
+// Массив API для генерации изображений
+const imageGenerationApis = [
+    {
+        name: 'Stable Diffusion',
+        url: 'https://api.example.com/generate-image' // Замените на реальный API для генерации изображений
+    }
+    // Добавьте здесь другие API для генерации изображений
+];
+
 async function tryTranslate(api, text) {
     try {
         const response = await fetch(api + encodeURIComponent(`переведи текст на английский: ${text}`));
@@ -21,7 +30,7 @@ async function tryTranslate(api, text) {
         if (data.ok && data.response) {
             return {
                 ok: true,
-                text: data.response.replace(/^"|"$/g, '') // Удаляем кавычки
+                text: data.response.replace(/^"|"$/g, '')
             };
         }
     } catch (error) {
@@ -31,7 +40,6 @@ async function tryTranslate(api, text) {
 }
 
 async function translateText(text) {
-    // Перемешиваем массив API случайным образом
     const shuffledApis = [...translationApis].sort(() => Math.random() - 0.5);
 
     for (const api of shuffledApis) {
@@ -58,6 +66,13 @@ async function tryGenerateImage(api, prompt) {
 }
 
 async function generateImage(prompt) {
+    if (imageGenerationApis.length === 0) {
+        return { 
+            ok: false, 
+            error: "😔 Не настроены API для генерации изображений." 
+        };
+    }
+
     const shuffledApis = [...imageGenerationApis].sort(() => Math.random() - 0.5);
 
     for (const api of shuffledApis) {
@@ -67,7 +82,10 @@ async function generateImage(prompt) {
         }
     }
 
-    return { ok: false, error: "😔 Не удалось сгенерировать изображение ни с одной из доступных API." };
+    return { 
+        ok: false, 
+        error: "😔 Не удалось сгенерировать изображение ни с одной из доступных API." 
+    };
 }
 
 window.handleImageGeneration = async function(message) {
@@ -75,7 +93,6 @@ window.handleImageGeneration = async function(message) {
     addMessage(`🖌 Генерация изображения для запроса: "${prompt}"`, false);
 
     try {
-        // Пытаемся перевести текст, используя разные API
         const translationResult = await translateText(prompt);
         
         if (translationResult.ok) {
@@ -90,13 +107,13 @@ window.handleImageGeneration = async function(message) {
                 `;
                 addMessage(imageMessage, false);
             } else {
-                addMessage("😔 Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
+                addMessage(imageResult.error || "😔 Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
             }
         } else {
-            addMessage("😔 Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
+            addMessage(translationResult.error || "😔 Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
         }
     } catch (error) {
         console.error('Error:', error);
-        addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
+        addMessage("😔 Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.", false);
     }
 };
