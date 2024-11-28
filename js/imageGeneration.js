@@ -39,14 +39,17 @@ async function translateText(prompt) {
 
 async function tryGenerateImage(api, prompt) {
     try {
-        const response = await fetch(api.url + encodeURIComponent(prompt));
+        const response = await fetch(api.url + encodeURIComponent(prompt), { method: 'GET' });
         const data = await response.json();
 
         if (data.ok && data.url) {
             return { ok: true, url: data.url, model: api.name };
         }
+
+        // Логируем ошибочный ответ API
+        console.warn(`API ${api.name} вернуло некорректный ответ:`, data);
     } catch (error) {
-        console.error(`Ошибка с ${api.name}:`, error);
+        console.error(`Ошибка с API ${api.name}:`, error);
     }
     return { ok: false };
 }
@@ -71,6 +74,8 @@ window.handleImageGeneration = async function (message) {
 
     try {
         const translatedPrompt = await translateText(prompt);
+        console.log(`Переведённый текст: ${translatedPrompt}`);
+
         const imageResult = await generateImage(translatedPrompt);
 
         if (imageResult.ok) {
@@ -81,10 +86,11 @@ window.handleImageGeneration = async function (message) {
             `;
             addMessage(imageMessage, false);
         } else {
+            console.error("Ошибка генерации изображения:", imageResult.error);
             addMessage("😔 Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
         }
     } catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка при обработке запроса:', error);
         addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
     }
 };
