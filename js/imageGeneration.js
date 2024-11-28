@@ -1,3 +1,48 @@
+// Массив API для перевода
+const translationApis = [
+    'https://api.paxsenix.biz.id/ai/gemma?text=',
+    'https://api.paxsenix.biz.id/ai/qwen2?text=',
+    'https://api.paxsenix.biz.id/ai/phi3?text=',
+    'https://api.paxsenix.biz.id/ai/gemini?text=',
+    'https://api.paxsenix.biz.id/ai/gpt4o?text=',
+    'https://api.paxsenix.biz.id/ai/gpt4omni?text=',
+    'https://api.paxsenix.biz.id/ai/gpt4?text=',
+    'https://api.paxsenix.biz.id/ai/gpt3?text=',
+    'https://api.paxsenix.biz.id/ai/llama?text=',
+    'https://api.paxsenix.biz.id/ai/nemotron?text=',
+    'https://api.paxsenix.biz.id/ai/llama3.1-70B?text='
+];
+
+async function tryTranslate(api, text) {
+    try {
+        const response = await fetch(api + encodeURIComponent(`переведи текст на английский: ${text}`));
+        const data = await response.json();
+        
+        if (data.ok && data.response) {
+            return {
+                ok: true,
+                text: data.response.replace(/^"|"$/g, '') // Удаляем кавычки
+            };
+        }
+    } catch (error) {
+        console.error(`Error with API ${api}:`, error);
+    }
+    return { ok: false };
+}
+
+async function translateText(text) {
+    // Перемешиваем массив API случайным образом
+    const shuffledApis = [...translationApis].sort(() => Math.random() - 0.5);
+
+    for (const api of shuffledApis) {
+        const result = await tryTranslate(api, text);
+        if (result.ok) {
+            return result;
+        }
+    }
+    return { ok: false, error: "Не удалось перевести текст ни с одной из доступных API." };
+}
+
 async function tryGenerateImage(api, prompt) {
     try {
         const response = await fetch(api.url + encodeURIComponent(prompt));
@@ -25,17 +70,16 @@ async function generateImage(prompt) {
     return { ok: false, error: "😔 Не удалось сгенерировать изображение ни с одной из доступных API." };
 }
 
-// Делаем функцию глобальной
 window.handleImageGeneration = async function(message) {
-    const prompt = message.slice(7).trim(); // Удаляем '/image ' из начала сообщения
+    const prompt = message.slice(7).trim();
     addMessage(`🖌 Генерация изображения для запроса: "${prompt}"`, false);
 
     try {
-        const translationResponse = await fetch(`https://paxsenix.serv00.net/v1/gpt3.5.php?text=${encodeURIComponent(`переведи текст на английский ${prompt}`)}`);
-        const translationData = await translationResponse.json();
+        // Пытаемся перевести текст, используя разные API
+        const translationResult = await translateText(prompt);
         
-        if (translationData.ok) {
-            const englishPrompt = translationData.response.replace(/^"|"$/g, ''); // Удаляем кавычки
+        if (translationResult.ok) {
+            const englishPrompt = translationResult.text;
             const imageResult = await generateImage(englishPrompt);
             
             if (imageResult.ok) {
@@ -50,7 +94,7 @@ window.handleImageGeneration = async function(message) {
             }
         } else {
             addMessage("😔 Не удалось перевести запрос. Пожалуйста, попробуйте еще раз.", false);
-            }
+        }
     } catch (error) {
         console.error('Error:', error);
         addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
