@@ -1,42 +1,3 @@
-async function tryTranslateText(apiUrl, prompt) {
-    try {
-        const response = await fetch(apiUrl + encodeURIComponent(prompt));
-        const data = await response.json();
-
-        if (data.ok && data.response) {
-            return { ok: true, text: data.response.replace(/^"|"$/g, '') }; // Убираем кавычки из строки
-        }
-    } catch (error) {
-        console.error(`Ошибка при запросе к API ${apiUrl}:`, error);
-    }
-    return { ok: false };
-}
-
-async function translateText(prompt) {
-    const translationApis = [
-        "https://api.paxsenix.biz.id/ai/gemma?text=",
-        "https://api.paxsenix.biz.id/ai/qwen2?text=",
-        "https://api.paxsenix.biz.id/ai/phi3?text=",
-        "https://api.paxsenix.biz.id/ai/gemini?text=",
-        "https://api.paxsenix.biz.id/ai/gpt4o?text=",
-        "https://api.paxsenix.biz.id/ai/gpt4omni?text=",
-        "https://api.paxsenix.biz.id/ai/gpt4?text=",
-        "https://api.paxsenix.biz.id/ai/gpt3?text=",
-        "https://api.paxsenix.biz.id/ai/llama?text=",
-        "https://api.paxsenix.biz.id/ai/nemotron?text=",
-        "https://api.paxsenix.biz.id/ai/llama3.1-70B?text="
-    ];
-
-    for (const apiUrl of translationApis) {
-        const result = await tryTranslateText(apiUrl, `переведи текст на английский ${prompt}`);
-        if (result.ok) {
-            return result.text;
-        }
-    }
-
-    throw new Error("Не удалось перевести текст ни с одним из доступных API.");
-}
-
 async function tryGenerateImage(api, prompt) {
     try {
         const response = await fetch(api.url + encodeURIComponent(prompt), { method: 'GET' });
@@ -73,10 +34,7 @@ window.handleImageGeneration = async function (message) {
     addMessage(`🖌 Генерация изображения для запроса: "${prompt}"`, false);
 
     try {
-        const translatedPrompt = await translateText(prompt);
-        console.log(`Переведённый текст: ${translatedPrompt}`);
-
-        const imageResult = await generateImage(translatedPrompt);
+        const imageResult = await generateImage(prompt);
 
         if (imageResult.ok) {
             const imageMessage = `
