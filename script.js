@@ -186,7 +186,13 @@ const imageGenerationApis = [
     { url: 'https://api.paxsenix.biz.id/ai-image/dreamshaper?text=', name: 'Dreamshaper' },
     { url: 'https://api.paxsenix.biz.id/ai-image/pixelart?text=', name: 'PixelArt' },
     { url: 'https://api.paxsenix.biz.id/ai-image/midjourney?text=', name: 'Midjourney' },
-    { url: 'https://api.paxsenix.biz.id/ai-image/nsfwimagine?text=', name: 'Nsfwimagine' }
+    { url: 'https://api.paxsenix.biz.id/ai-image/nsfwimagine?text=', name: 'Nsfwimagine' },
+    { url: 'https://paxsenix.serv00.net/v1/pollinations.php?text=', name: 'pollinations (резерв)' },
+    { url: 'https://paxsenix.serv00.net/v1/magicstudio.php?text=', name: 'magicstudio (резерв)' },
+    { url: 'https://paxsenix.serv00.net/v1/sdxl.php?text=', name: 'sdxl (резерв)' },
+    { url: 'https://paxsenix.serv00.net/v1/prodia.php?text=', name: 'prodia (резерв)' },
+    { url: 'https://paxsenix.serv00.net/v1/jugger.php?text=', name: 'jugger (резерв)' },
+    { url: 'https://paxsenix.serv00.net/v1/dalle.php?text=', name: 'dalle (резерв)' }
 ];
 
 async function tryGenerateImage(api, prompt) {
