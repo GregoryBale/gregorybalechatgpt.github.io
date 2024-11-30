@@ -183,7 +183,10 @@ const imageGenerationApis = [
     { url: 'https://api.paxsenix.biz.id/ai-image/prodia?text=', name: 'Prodia' },
     { url: 'https://api.paxsenix.biz.id/ai-image/upscale?text=', name: 'Upscale' },
     { url: 'https://api.paxsenix.biz.id/ai-image/blackbox?text=', name: 'Blackbox' },
-    { url: 'https://api.paxsenix.biz.id/ai-image/dreamshaper?text=', name: 'Dreamshaper' }
+    { url: 'https://api.paxsenix.biz.id/ai-image/dreamshaper?text=', name: 'Dreamshaper' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/pixelart?text=', name: 'PixelArt' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/midjourney?text=', name: 'Midjourney' },
+    { url: 'https://api.paxsenix.biz.id/ai-image/nsfwimagine?text=', name: 'Nsfwimagine' }
 ];
 
 async function tryGenerateImage(api, prompt) {
