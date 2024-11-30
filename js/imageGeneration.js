@@ -1,16 +1,13 @@
 async function tryGenerateImage(api, prompt) {
     try {
-        const response = await fetch(api.url + encodeURIComponent(prompt), { method: 'GET' });
+        const response = await fetch(api.url + encodeURIComponent(prompt));
         const data = await response.json();
 
         if (data.ok && data.url) {
             return { ok: true, url: data.url, model: api.name };
         }
-
-        // Логируем ошибочный ответ API
-        console.warn(`API ${api.name} вернуло некорректный ответ:`, data);
     } catch (error) {
-        console.error(`Ошибка с API ${api.name}:`, error);
+        console.error(`Error with ${api.name}:`, error);
     }
     return { ok: false };
 }
@@ -29,7 +26,7 @@ async function generateImage(prompt) {
 }
 
 // Делаем функцию глобальной
-window.handleImageGeneration = async function (message) {
+window.handleImageGeneration = async function(message) {
     const prompt = message.slice(7).trim(); // Удаляем '/image ' из начала сообщения
     addMessage(`🖌 Генерация изображения для запроса: "${prompt}"`, false);
 
@@ -44,11 +41,10 @@ window.handleImageGeneration = async function (message) {
             `;
             addMessage(imageMessage, false);
         } else {
-            console.error("Ошибка генерации изображения:", imageResult.error);
             addMessage("😔 Не удалось сгенерировать изображение. Пожалуйста, попробуйте еще раз.", false);
         }
     } catch (error) {
-        console.error('Ошибка при обработке запроса:', error);
+        console.error('Error:', error);
         addMessage("😔 Произошла ошибка при генерации изображения. Пожалуйста, попробуйте еще раз.", false);
     }
 };
